@@ -17,6 +17,7 @@ public class OptionGridOverlay extends inkCustomController {
     private let m_lastBtn: wref<inkCanvas>;
     private let m_prevBtn: wref<inkCanvas>;
     private let m_nextBtn: wref<inkCanvas>;
+    private let m_favBtn: wref<inkCanvas>;
     private let m_toastIcon: wref<inkImage>;
     private let m_toastText: wref<inkText>;
     private let m_tiles: array<wref<inkCanvas>>;
@@ -150,7 +151,19 @@ public class OptionGridOverlay extends inkCustomController {
         let lastBtn = this.MakeButton("LAST", n"OnLastRelease", 190.0);
         lastBtn.SetAffectsLayoutWhenHidden(false);
         lastBtn.Reparent(footer);
+        // Star: favorite/unfavorite the entry currently applied (see UpdateFavButton).
+        let favBtn = this.MakeButton("", n"OnFavCurrentRelease", 90.0);
+        let favStar = new inkImage();
+        favStar.SetName(n"favStar");
+        favStar.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
+        favStar.SetTexturePart(n"icon_star");
+        favStar.SetAnchor(inkEAnchor.Centered);
+        favStar.SetAnchorPoint(Vector2(0.5, 0.5));
+        favStar.SetSize(Vector2(44.0, 44.0));
+        favStar.Reparent(favBtn);
+        favBtn.Reparent(footer);
         this.MakeButton("CLOSE", n"OnCloseRelease", 220.0).Reparent(footer);
+        this.m_favBtn = favBtn;
         this.m_firstBtn = firstBtn;
         this.m_lastBtn = lastBtn;
         this.m_prevBtn = prevBtn;
@@ -435,6 +448,39 @@ public class OptionGridOverlay extends inkCustomController {
         let favCount = IsDefined(favs) && IsDefined(info) ? favs.CountFor(info.uiSlot) : 0;
         this.m_info.SetText(s"\(this.GetCount()) options  ·  \(favCount) fav  ·  page \(this.m_page + 1)/\(this.PageCount())  ·  current #\(this.GetCurrent())");
         this.UpdatePaging();
+        this.UpdateFavButton();
+    }
+
+    private func UpdateFavButton() {
+        let star = this.m_favBtn.GetWidget(n"favStar");
+        let current = this.GetCurrent();
+        if current < 0 {
+            star.SetOpacity(0.2);
+            return;
+        }
+        let fav = this.IsFavorite(current);
+        star.SetTintColor(fav ? CCUI_Gold() : CCUI_MildRed());
+        star.SetOpacity(fav ? 1.0 : 0.6);
+    }
+
+    // Shared by the tile stars and the footer star.
+    private func ToggleFavorite(index: Int32) {
+        let info = this.GetInfo();
+        let favs = OptionFavorites.Get();
+        if index < 0 || !IsDefined(info) || !IsDefined(favs) {
+            return;
+        }
+        let key = CCUI_FavoriteKey(info, index);
+        let now = favs.Toggle(key);
+        CCUI_Log(s"favorite \(NameToString(key)) -> \(now)");
+        this.ShowToast(now, CCUI_EntryLabel(info, index));
+        if IsDefined(this.m_menu) {
+            this.m_menu.PlaySound(n"Button", n"OnPress");
+        }
+        // Re-sort but stay on the same page.
+        this.BuildOrder();
+        this.m_page = Min(this.m_page, this.PageCount() - 1);
+        this.Rebuild();
     }
 
     private func UpdatePaging() {
@@ -495,23 +541,15 @@ public class OptionGridOverlay extends inkCustomController {
 
     protected cb func OnStarRelease(e: ref<inkPointerEvent>) -> Bool {
         if e.IsAction(n"click") {
-            let tile = e.GetCurrentTarget().GetParentWidget();
-            let index = CCUI_TileIndex(tile);
-            let info = this.GetInfo();
-            let favs = OptionFavorites.Get();
-            if index >= 0 && IsDefined(info) && IsDefined(favs) {
-                let key = CCUI_FavoriteKey(info, index);
-                let now = favs.Toggle(key);
-                CCUI_Log(s"favorite \(NameToString(key)) -> \(now)");
-                this.ShowToast(now, CCUI_EntryLabel(info, index));
-                if IsDefined(this.m_menu) {
-                    this.m_menu.PlaySound(n"Button", n"OnPress");
-                }
-                // Re-sort but stay on the same page.
-                this.BuildOrder();
-                this.m_page = Min(this.m_page, this.PageCount() - 1);
-                this.Rebuild();
-            }
+            this.ToggleFavorite(CCUI_TileIndex(e.GetCurrentTarget().GetParentWidget()));
+        }
+        e.Handle();
+        return true;
+    }
+
+    protected cb func OnFavCurrentRelease(e: ref<inkPointerEvent>) -> Bool {
+        if e.IsAction(n"click") {
+            this.ToggleFavorite(this.GetCurrent());
         }
         e.Handle();
         return true;

@@ -9,6 +9,7 @@ First release. Developed as "Hair Grid", which was never published.
   - Clicking a tile applies it immediately. The grid opens on the page with the current entry.
 - Favorites: a star toggle on each tile pins that entry to the front of its category.
   - Stored by internal name per category and shared across saves (Codeware persistent service).
+  - A footer star button toggles the entry currently applied.
   - A fading notice confirms each add or remove.
 - Paging: `< PREV` / `NEXT >`, plus `FIRST` / `LAST` (with `‹` / `›`) when a row has more than two pages.
 - Minimize: a `[–]`/`[+]` toggle on every row, voice tone included, collapses rarely-changed rows to a single bare line. The choice is remembered across saves.
