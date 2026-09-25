@@ -17,6 +17,7 @@ private let m_ccuiOverlay: ref<OptionGridOverlay>;
 @wrapMethod(characterCreationBodyMorphMenu)
 public final func InitializeList() -> Void {
     ArrayClear(this.m_ccuiOptions);
+    ArrayClear(this.m_ccuiRows);
     wrappedMethod();
     CCUI_Log(s"InitializeList done, \(ArraySize(this.m_ccuiOptions)) grid rows");
     this.CCUI_EnsureUI();
@@ -35,6 +36,8 @@ public final func CreateEntry(const option: ref<CharacterCustomizationOption>) -
             CCUI_Log(s"grid row \(NameToString(option.info.uiSlot)): \(CCUI_EntryCount(option.info)) entries, current=\(option.currIndex)");
         }
     }
+    // Every row can be minimized; keyed by the option's internal name (unique, unlike uiSlot).
+    this.CCUI_AttachCollapse(widget, option.info.name);
     return widget;
 }
 

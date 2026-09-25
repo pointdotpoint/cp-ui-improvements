@@ -102,7 +102,7 @@ for root, _, files in os.walk(src):
         if f.endswith('.reds'):
             for kind, cls, name in scan(os.path.join(root, f)):
                 ours[cls].add(name)
-conflicts, touching = [], collections.defaultdict(set)
+conflicts, notes, touching = [], [], collections.defaultdict(set)
 for root, _, files in os.walk(dump):
     for f in files:
         if not f.endswith('.reds'):
@@ -112,16 +112,24 @@ for root, _, files in os.walk(dump):
             if cls in ours:
                 mod = os.path.relpath(p, dump).split(os.sep)[0]
                 touching[mod].add(os.path.dirname(p))
-                # Same member added twice, or someone replacing a method we wrap: real conflicts.
-                if name in ours[cls] and kind in ('replaceMethod', 'addMethod', 'addField'):
-                    conflicts.append(f"{kind} {cls}.{name} in mod {mod}")
+                if name in ours[cls]:
+                    if kind in ('addMethod', 'addField'):
+                        # Same member added twice: a hard conflict.
+                        conflicts.append(f"{kind} {cls}.{name} in mod {mod}")
+                    elif kind == 'replaceMethod':
+                        # Our wrapper runs around their replacement (redscript applies wraps on top);
+                        # worth knowing, and the compile step below still has to pass.
+                        notes.append(f"replaceMethod {cls}.{name} in mod {mod} (we wrap it)")
 for c in conflicts:
     print("CONFLICT", c)
+for n in notes:
+    print("NOTE", n)
 for mod, dirs in sorted(touching.items()):
     print("MOD", mod, *sorted(dirs), sep="\t")
 EOF
     nconf=$(grep -c '^CONFLICT' "$TMP/compat")
-    grep '^CONFLICT' "$TMP/compat"
+    nnote=$(grep -c '^NOTE' "$TMP/compat")
+    grep -E '^(CONFLICT|NOTE)' "$TMP/compat"
     ok=(); broken=(); bad=()
     while IFS=$'\t' read -r _ mod dirs_rest; do
         IFS=$'\t' read -ra dirs <<< "$dirs_rest"
@@ -137,7 +145,7 @@ EOF
     done < <(grep '^MOD' "$TMP/compat")
     summary="${#ok[@]} compile with ours [${ok[*]:-}]; ${#broken[@]} outdated for 2.31 on their own [${broken[*]:-}]"
     if [[ "$nconf" -eq 0 && ${#bad[@]} -eq 0 ]]; then
-        record PASS "Nexus compat: 0 hook conflicts; $summary"
+        record PASS "Nexus compat: 0 hook conflicts, $nnote replaceMethod notes; $summary"
     else
         record FAIL "Nexus compat: $nconf hook conflicts; fails only with ours: [${bad[*]:-}]; $summary"
     fi

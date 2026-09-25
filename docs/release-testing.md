@@ -18,6 +18,7 @@ Status key: **done** = observed working in the logs or reported during developme
 | 8 | Gamepad: nothing breaks, arrows still work | todo | The grid itself is mouse-only (known limitation). |
 | 9 | Tile text: long names end with "…" inside the tile, no overlap | todo | |
 | 9b | Paging: one or two pages shows `< PREV` / `NEXT >` only; more than two shows `FIRST` `<<` `>>` `LAST`, and FIRST/LAST jump to the ends | todo | E.g. nose (one page) vs hairstyle (many pages). |
+| 9c | Minimize: `[–]` on voice tone and on a normal row collapses it to a strip with name and value; `[+]` restores it. The collapsed row's arrows don't respond. The state survives reopening the menu and a restart. The list scrolls correctly with rows collapsed. Mirrors with Appearance Change Unlocker, which removes the voice row, still work | todo | |
 | 10 | Rows *without* a grid (skin tone, hair color, eyes, eyebrows, …) look and behave vanilla | todo | |
 | 11 | Uninstall: delete the folder; the game starts and the creator is vanilla | todo | |
 

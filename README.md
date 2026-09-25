@@ -30,6 +30,7 @@ The rows are listed in `CCUI_IsGridSlot` in `GridTargets.reds`:
   - Favorites are listed first, gold-starred, and counted per category in the header.
   - They're keyed as `<uiSlot>:<internal name>`, so they survive mods being added or removed, and they're shared across all saves (Codeware persistent storage).
   - Clicking the star doesn't apply the entry. A short notice ("Added to favorites: …" / "Removed from favorites: …") appears above the buttons and fades out.
+- **Minimize rows:** every row (including voice tone) gets a small `[–]` left of its name. Minimizing collapses the row to a one-line strip with its name and value; `[+]` expands it again. The collapsed row's arrows and buttons are disabled, so it can't be changed by accident. Minimized rows are remembered across sessions and saves, keyed by the option's internal name (`voice_tone` for the voice switcher). Color-swatch rows show only their name while minimized.
 - **Paging:** with one or two pages, `< PREV` / `NEXT >` (wrapping around). With more than two pages the footer becomes `FIRST` `<<` `>>` `LAST`. **CLOSE**, or Esc, closes the grid.
 - While a grid is open, confirm and randomize inputs are blocked so a stray click can't finish character creation.
 - The vanilla ◁ ▷ arrows keep working.
@@ -56,7 +57,7 @@ scripts/package.sh         # just build + verify dist/CharacterCreatorUIImprovem
 2. **Compile** against the vanilla bundle plus Codeware.
 3. **Compile** with every mod installed in the game folder. Only diagnostics in our files count.
 4. **Compile** with the redscript 1.0 preview. Our files must be clean; Codeware 1.19 itself has errors under 1.0.
-5. **Nexus compatibility:** mods in [rfuzzo/cyberpunk-nexus-script-dump](https://github.com/rfuzzo/cyberpunk-nexus-script-dump) that annotate the same classes. The check looks for conflicting `@replaceMethod`/`@addMethod`/`@addField` on what we touch, then compiles each of those mods next to ours. Mods that don't compile on the current game version even without ours are reported separately.
+5. **Nexus compatibility:** mods in [rfuzzo/cyberpunk-nexus-script-dump](https://github.com/rfuzzo/cyberpunk-nexus-script-dump) that annotate the same classes. Duplicate `@addMethod`/`@addField` names on the classes we touch fail the check. A `@replaceMethod` on a method we wrap is reported as a note, since our wrapper runs around the replacement. Each of those mods is then compiled next to ours. Mods that don't compile on the current game version even without ours are reported separately.
 6. **Package:** builds the zip, checks it contains exactly `r6/scripts/CPUIImprovements/CharacterCreator/*.reds`, and compiles the extracted copy. It refuses to package if debug logging is on.
 
 Release docs: `CHANGELOG.md`, `docs/nexus-description.bbcode` (paste into the Nexus description, which uses BBCode) and `docs/release-testing.md` (in-game test sheet). Bump the version in `ModInfo.reds` (`CCUI_Version()`).
@@ -77,6 +78,7 @@ The first run builds `redscript-cli` v0.5.31 into `.tools/`. That version matche
 - `SelectorGallery.reds`: restyles a `Selector` row (`characterCreationBodyMorphOption`) with the gallery art and adds the middle button, which opens that row's own option.
 - `OptionGridOverlay.reds`: the Codeware `inkCustomController` overlay, one instance reused for every row.
 - `OptionFavorites.reds`: the favorites store, a `ScriptableService` with a `persistent` `array<CName>`.
+- `RowCollapse.reds`: the minimize toggle. It wraps `CreateVoiceOverSwitcher` for the voice row; other rows attach from the `CreateEntry` wrap. `RowLayoutStore` is a persistent service holding the minimized rows.
 - `ModInfo.reds`: version constant and log switches.
 
 Logging uses Codeware `ModLog(n"CCUIImprovements", ...)`, which writes to `<game>/bin/x64/plugins/cyber_engine_tweaks/gamelog.log` (flushed with a delay while the game runs). Release builds log one line at startup (`Character Creator UI Improvements <version> ready`). Set `CCUI_DebugLogging()` to `true` in `ModInfo.reds` for verbose open, apply and confirm lines.
