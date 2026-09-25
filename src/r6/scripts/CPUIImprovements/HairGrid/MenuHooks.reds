@@ -25,6 +25,7 @@ public final func CreateEntry(const option: ref<CharacterCustomizationOption>) -
     let widget = wrappedMethod(option);
     if Equals(option.info.uiSlot, n"hairstyle") && IsDefined(option.info as gameuiSwitcherInfo) {
         this.m_hgOption = option;
+        HG_Log(s"hairstyle option: \(ArraySize((option.info as gameuiSwitcherInfo).options)) styles, current=\(option.currIndex)");
         let row = widget.GetController() as characterCreationBodyMorphOption;
         if IsDefined(row) {
             row.HG_EnableGallery(this);
@@ -98,19 +99,51 @@ public func HG_Close() {
     }
 }
 
-// Mirrors OnSliderChange: same camera/busy handling, same system call.
+// Mirrors OnSliderChange: same camera/busy handling, same system call, same telemetry.
 @addMethod(characterCreationBodyMorphMenu)
 public func HG_Apply(index: Int32) {
     if !IsDefined(this.m_hgOption) {
         return;
     }
-    HG_Log(s"apply #\(index) (busy=\(EnumInt(this.m_busySwitchingAppearance)))");
+    let current = Cast<Int32>(this.m_hgOption.currIndex);
+    HG_Log(s"apply #\(index) (current=\(current), busy=\(EnumInt(this.m_busySwitchingAppearance)), finalized=\(this.m_updatingFinalizedState))");
+    if index == current {
+        return;
+    }
     if Equals(this.m_busySwitchingAppearance, BusySwitchingReason.AVAILABLE) {
         this.RequestCameraChange(this.GetSlotName(this.m_hgOption));
         this.m_busySwitchingAppearance = BusySwitchingReason.SWAPPING;
     }
     this.GetCharacterCustomizationSystem().ApplyChangeToOption(this.m_hgOption, Cast<Uint32>(index));
+    this.GetTelemetrySystem().LogInitialChoiceOptionSelected(this.m_hgOption, Cast<Uint32>(index));
     this.PlaySound(n"Button", n"OnPress");
+}
+
+// ---- diagnostics for the confirm flow ----
+
+@wrapMethod(characterCreationBodyMorphMenu)
+public final func ConfirmCustomizedCharacter() -> Void {
+    HG_Log(s"confirm (finalized=\(this.m_updatingFinalizedState), busy=\(EnumInt(this.m_busySwitchingAppearance)), gridOpen=\(this.HG_IsOpen()))");
+    this.HG_Close();
+    wrappedMethod();
+}
+
+@wrapMethod(characterCreationBodyMorphMenu)
+protected cb func OnAppearanceAppliedEvent(evt: ref<gameuiCharacterCustomizationSystem_OnAppearanceAppliedEvent>) -> Bool {
+    HG_Log(s"appearance applied (busy=\(EnumInt(this.m_busySwitchingAppearance)))");
+    return wrappedMethod(evt);
+}
+
+@wrapMethod(characterCreationBodyMorphMenu)
+protected cb func OnReFinalizeComplete(evt: ref<gameuiCharacterCustomizationSystem_OnReFinalizeStateCompleteEvent>) -> Bool {
+    HG_Log("refinalize complete");
+    return wrappedMethod(evt);
+}
+
+@wrapMethod(characterCreationBodyMorphMenu)
+protected cb func OnCancelFinalizedStateUpdate(evt: ref<gameuiCharacterCustomizationSystem_OnCancelFinalizedStateUpdateEvent>) -> Bool {
+    HG_Log("refinalize cancelled");
+    return wrappedMethod(evt);
 }
 
 @addMethod(characterCreationBodyMorphMenu)
