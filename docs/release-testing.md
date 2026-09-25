@@ -8,10 +8,10 @@ Status key: **done** = observed working in the logs or reported during developme
 
 | # | Scenario | Status | Evidence / notes |
 |---|---|---|---|
-| 1 | Startup: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready` in `gamelog.log`, no redscript error popup | todo | |
-| 2 | Pick an entry from a grid, then CONFIRM: finalizes normally | done (hair) / todo | 2026-09-25 13:01: apply #152, then "refinalize complete". Re-check after picking a nose or tattoo. |
-| 3 | Favorites: star toggles, favorites sort first, notice fades, header count is per category | done (hair) / todo | A starred nose must not count in the hair header. |
-| 4 | Favorites persist after a full quit and relaunch | todo | Codeware writes persistent data on clean exit; also check after an Alt+F4. Hair favorites from the Hair Grid builds reset once because of the rename. |
+| 1 | Startup: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready` in `gamelog.log`, no redscript error popup | done | 2026-09-25 13:53:19: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready`, no error popup. |
+| 2 | Pick an entry from a grid, then CONFIRM: finalizes normally | done | Hair: 13:01 apply then "refinalize complete". Other rows reported working by the user ("it all works well"). |
+| 3 | Favorites: star toggles, favorites sort first, notice fades, header count is per category | done | Nose and cyberware favorites stored per category (`nose:h042`, `cyberware_switcher:cyberware_07`); reported working. |
+| 4 | Favorites persist after a full quit and relaunch | done | Keys present in Codeware's `ScriptableServiceContainer.dat` after a clean exit (14:00:10) and reported working after relaunch. Old Hair Grid favorites were lost to the pre-release rename (not a user-facing issue). |
 | 5 | New Game creator, real apartment mirror, ripperdoc, Character Customization Anywhere | mirror via CCA done (hair) / rest todo | |
 | 6 | Male V | todo | Morph and switcher counts differ. |
 | 7 | Esc closes the grid; Enter/F don't confirm while it's open | todo | |
@@ -27,12 +27,12 @@ For each row, check that it shows `◁ ▦ ▷`, then open its grid. The title s
 
 | Row | `uiSlot` | Kind | Status |
 |---|---|---|---|
-| Hairstyle | `hairstyle` | switcher | done (hair-only build) / todo |
-| Mouth | `mouth` | morph | todo |
-| Nose | `nose` | morph | todo |
-| Jaw | `jaw` | morph | todo |
-| Ears | `ear` | morph | todo |
-| Cyberware | `cyberware_switcher` | switcher | todo |
-| Facial tattoos | `facial_tattoo_switcher` | switcher | todo |
-| Piercings | `piercings` | switcher | todo |
-| Eye makeup | `makeupEyes` | switcher | todo |
+| Hairstyle | `hairstyle` | switcher | done |
+| Mouth | `mouth` | morph | done (user-reported) |
+| Nose | `nose` | morph | done (user-reported) |
+| Jaw | `jaw` | morph | done (user-reported) |
+| Ears | `ear` | morph | done (user-reported) |
+| Cyberware | `cyberware_switcher` | switcher | done (user-reported) |
+| Facial tattoos | `facial_tattoo_switcher` | switcher | done (user-reported) |
+| Piercings | `piercings` | switcher | done (user-reported) |
+| Eye makeup | `makeupEyes` | switcher | done (user-reported) |

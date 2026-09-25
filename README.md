@@ -84,3 +84,6 @@ The first run builds `redscript-cli` v0.5.31 into `.tools/`. That version matche
 Logging uses Codeware `ModLog(n"CCUIImprovements", ...)`, which writes to `<game>/bin/x64/plugins/cyber_engine_tweaks/gamelog.log` (flushed with a delay while the game runs). Release builds log one line at startup (`Character Creator UI Improvements <version> ready`). Set `CCUI_DebugLogging()` to `true` in `ModInfo.reds` for verbose open, apply and confirm lines.
 
 The in-game test sheet is `docs/release-testing.md`.
+
+## License
+MIT, see `LICENSE`.
