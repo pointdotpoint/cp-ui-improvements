@@ -9,7 +9,7 @@ public func HG_Log(msg: String) {
 
 public class HairGridOverlay extends inkCustomController {
     private let m_menu: wref<characterCreationBodyMorphMenu>;
-    private let m_option: ref<CharacterCustomizationOption>;
+    private let m_option: wref<CharacterCustomizationOption>;
     private let m_page: Int32;
     private let m_hovered: Int32;
 
@@ -121,7 +121,7 @@ public class HairGridOverlay extends inkCustomController {
         return IsDefined(this.GetRootWidget()) && this.GetRootWidget().IsVisible();
     }
 
-    public func Open(option: ref<CharacterCustomizationOption>) {
+    public func Open(option: wref<CharacterCustomizationOption>) {
         this.m_option = option;
         let count = this.GetCount();
         HG_Log(s"open: \(count) options, current=\(this.GetCurrent())");
@@ -139,7 +139,7 @@ public class HairGridOverlay extends inkCustomController {
     }
 
     // Called when the system reports a new option state (after an apply).
-    public func Refresh(option: ref<CharacterCustomizationOption>) {
+    public func Refresh(option: wref<CharacterCustomizationOption>) {
         this.m_option = option;
         if this.IsOpen() {
             this.RestyleTiles();

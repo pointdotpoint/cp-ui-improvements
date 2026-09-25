@@ -4,7 +4,7 @@ module CPUIImprovements.HairGrid
 import Codeware.UI.*
 
 @addField(characterCreationBodyMorphMenu)
-private let m_hgOption: ref<CharacterCustomizationOption>;
+private let m_hgOption: wref<CharacterCustomizationOption>;
 
 @addField(characterCreationBodyMorphMenu)
 private let m_hgOverlay: ref<HairGridOverlay>;
