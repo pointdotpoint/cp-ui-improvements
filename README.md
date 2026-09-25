@@ -37,7 +37,7 @@ The first run builds `redscript-cli` v0.5.31 into `.tools/`. That version matche
 - `src/r6/scripts/CPUIImprovements/HairGrid/SelectorGallery.reds`: restyles the hairstyle `Selector` row (`characterCreationBodyMorphOption`) with the gallery art and adds the middle button.
 - `src/r6/scripts/CPUIImprovements/HairGrid/HairGridOverlay.reds`: the Codeware `inkCustomController` overlay.
 
-Debug lines are written with Codeware `ModLog(n"HairGrid", ...)`.
+Debug lines are written with Codeware `ModLog(n"HairGrid", ...)` and land in `<game>/bin/x64/plugins/cyber_engine_tweaks/gamelog.log` (flushed with a delay while the game runs).
 
 ## In-game test checklist
 1. Deploy, then launch. If redscript shows an error popup, run `scripts/check.sh --log`.
