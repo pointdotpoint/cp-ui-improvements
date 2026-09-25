@@ -29,10 +29,10 @@ public class HairGridOverlay extends inkCustomController {
         self.m_hovered = -1;
         // Layout in the 3840x2160 authoring space the creator uses.
         self.m_cols = 3;
-        self.m_rows = 10;
+        self.m_rows = 9;
         self.m_tileW = 400.0;
-        self.m_tileH = 110.0;
-        self.m_gap = 16.0;
+        self.m_tileH = 120.0;
+        self.m_gap = 14.0;
         self.CreateInstance();
         return self;
     }
@@ -47,33 +47,39 @@ public class HairGridOverlay extends inkCustomController {
         let backdrop = new inkRectangle();
         backdrop.SetName(n"backdrop");
         backdrop.SetAnchor(inkEAnchor.Fill);
-        backdrop.SetTintColor(HG_Color(0.0, 0.0, 0.0));
-        backdrop.SetOpacity(0.55);
+        backdrop.SetTintColor(HG_Black());
+        backdrop.SetOpacity(0.45);
         backdrop.SetInteractive(true);
         backdrop.RegisterToCallback(n"OnRelease", this, n"OnBackdropRelease");
         backdrop.Reparent(root);
 
         let contentW = Cast<Float>(this.m_cols) * this.m_tileW + Cast<Float>(this.m_cols - 1) * this.m_gap;
+        let gridH = Cast<Float>(this.m_rows) * (this.m_tileH + this.m_gap);
+        let panelW = contentW + 80.0;
+        // Header (~110) + grid + footer (~110) + padding (72).
+        let panelH = 110.0 + gridH + 110.0 + 72.0;
 
+        // Right side, over the option list, below "CUSTOMIZE YOUR LOOK" and above BACK/CONFIRM.
         let panel = new inkCanvas();
         panel.SetName(n"panel");
-        // Right side, over the option list, so the model stays visible.
-        panel.SetAnchor(inkEAnchor.CenterRight);
-        panel.SetAnchorPoint(new Vector2(1.0, 0.5));
-        panel.SetMargin(new inkMargin(0.0, 0.0, 110.0, 0.0));
-        panel.SetSize(new Vector2(contentW + 80.0, 1640.0));
+        panel.SetAnchor(inkEAnchor.TopRight);
+        panel.SetAnchorPoint(new Vector2(1.0, 0.0));
+        panel.SetMargin(new inkMargin(0.0, 250.0, 110.0, 0.0));
+        panel.SetSize(new Vector2(panelW, panelH));
         panel.SetInteractive(true);
         panel.Reparent(root);
 
         let panelBg = new inkRectangle();
         panelBg.SetAnchor(inkEAnchor.Fill);
-        panelBg.SetTintColor(HG_Color(0.04, 0.05, 0.07));
-        panelBg.SetOpacity(0.94);
+        panelBg.SetTintColor(HG_PanelBg());
+        panelBg.SetOpacity(0.96);
         panelBg.Reparent(panel);
+
+        HG_AddFrame(panel, HG_MildRed(), 2.0, 0.8);
 
         let accent = new inkRectangle();
         accent.SetAnchor(inkEAnchor.TopFillHorizontaly);
-        accent.SetSize(new Vector2(100.0, 4.0));
+        accent.SetSize(new Vector2(100.0, 5.0));
         accent.SetTintColor(HG_Red());
         accent.Reparent(panel);
 
@@ -91,18 +97,18 @@ public class HairGridOverlay extends inkCustomController {
         title.SetLetterCase(textLetterCase.UpperCase);
         title.Reparent(header);
 
-        let info = HG_MakeText("", 34, n"Medium", HG_Grey());
-        info.SetMargin(new inkMargin(40.0, 14.0, 0.0, 0.0));
+        let info = HG_MakeText("", 32, n"Medium", HG_MildRed());
+        info.SetMargin(new inkMargin(36.0, 16.0, 0.0, 0.0));
         info.Reparent(header);
 
         let grid = new inkVerticalPanel();
         grid.SetName(n"grid");
-        grid.SetSize(new Vector2(contentW, Cast<Float>(this.m_rows) * (this.m_tileH + this.m_gap)));
+        grid.SetSize(new Vector2(contentW, gridH));
         grid.Reparent(content);
 
         // Footer: paging + close
         let footer = new inkHorizontalPanel();
-        footer.SetMargin(new inkMargin(0.0, 20.0, 0.0, 0.0));
+        footer.SetMargin(new inkMargin(0.0, 16.0, 0.0, 0.0));
         footer.Reparent(content);
 
         this.MakeButton("< PREV", n"OnPrevRelease").Reparent(footer);
@@ -204,6 +210,8 @@ public class HairGridOverlay extends inkCustomController {
     }
 
     private func MakeTile(index: Int32, entry: gameuiSwitcherOption) -> ref<inkCanvas> {
+        let textW = this.m_tileW - 40.0;
+
         let tile = new inkCanvas();
         tile.SetName(StringToName(s"hair_tile_\(index)"));
         tile.SetSize(new Vector2(this.m_tileW, this.m_tileH));
@@ -215,30 +223,36 @@ public class HairGridOverlay extends inkCustomController {
         bg.SetAnchor(inkEAnchor.Fill);
         bg.Reparent(tile);
 
+        let frame = HG_AddFrame(tile, HG_MildRed(), 2.0, 0.7);
+        frame.SetName(n"frame");
+
         let bar = new inkRectangle();
         bar.SetName(n"bar");
         bar.SetAnchor(inkEAnchor.LeftFillVerticaly);
         bar.SetSize(new Vector2(6.0, 100.0));
         bar.Reparent(tile);
 
-        let label = HG_MakeText(this.GetLabel(entry), 32, n"Semi-Bold", HG_White());
+        // Up to two lines, clipped with an ellipsis on the second.
+        let label = HG_MakeText(HG_Ellipsize(this.GetLabel(entry), 50), 30, n"Semi-Bold", HG_Red());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.TopLeft);
-        label.SetMargin(new inkMargin(20.0, 12.0, 12.0, 0.0));
-        label.SetWrapping(true, this.m_tileW - 36.0);
-        label.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
-        label.SetSize(new Vector2(this.m_tileW - 36.0, 44.0));
+        label.SetMargin(new inkMargin(20.0, 10.0, 0.0, 0.0));
+        label.SetFitToContent(false);
+        label.SetSize(new Vector2(textW, 72.0));
+        label.SetWrapping(true, textW);
+        label.SetOverflowPolicy(textOverflowPolicy.DotsEndLastLine);
         label.Reparent(tile);
 
         // Index + internal name help tell apart CCXL hairs that share a display name.
         let internal = ArraySize(entry.names) > 0 ? NameToString(entry.names[0]) : "";
-        let sub = HG_MakeText(s"#\(index)  \(internal)", 22, n"Regular", HG_Grey());
+        let sub = HG_MakeText(HG_Ellipsize(s"#\(index)  \(internal)", 36), 22, n"Regular", HG_MildRed());
         sub.SetName(n"sub");
         sub.SetAnchor(inkEAnchor.BottomLeft);
         sub.SetAnchorPoint(new Vector2(0.0, 1.0));
-        sub.SetMargin(new inkMargin(20.0, 0.0, 12.0, 10.0));
+        sub.SetMargin(new inkMargin(20.0, 0.0, 0.0, 8.0));
+        sub.SetFitToContent(false);
+        sub.SetSize(new Vector2(textW, 28.0));
         sub.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
-        sub.SetSize(new Vector2(this.m_tileW - 36.0, 28.0));
         sub.Reparent(tile);
 
         tile.RegisterToCallback(n"OnRelease", this, n"OnTileRelease");
@@ -259,6 +273,7 @@ public class HairGridOverlay extends inkCustomController {
         return label;
     }
 
+    // Vanilla option-row look: dark red fill, red frame and text; the active value is cyan.
     private func RestyleTiles() {
         let current = this.GetCurrent();
         for tile in this.m_tiles {
@@ -267,24 +282,38 @@ public class HairGridOverlay extends inkCustomController {
             let hovered = index == this.m_hovered;
 
             let bg = tile.GetWidget(n"bg");
+            let frame = tile.GetWidget(n"frame");
             let bar = tile.GetWidget(n"bar");
             let label = tile.GetWidget(n"label");
+            let sub = tile.GetWidget(n"sub");
 
             if selected {
-                bg.SetTintColor(HG_Color(0.30, 0.08, 0.08));
+                bg.SetTintColor(HG_FaintBlue());
+                bg.SetOpacity(0.9);
+                frame.SetTintColor(HG_Blue());
+                frame.SetOpacity(1.0);
+                bar.SetTintColor(HG_Blue());
+                bar.SetOpacity(1.0);
+                label.SetTintColor(HG_Blue());
+                sub.SetTintColor(HG_MildBlue());
+            } else if hovered {
+                bg.SetTintColor(HG_HoverRed());
+                bg.SetOpacity(0.9);
+                frame.SetTintColor(HG_Red());
+                frame.SetOpacity(1.0);
                 bar.SetTintColor(HG_Red());
                 bar.SetOpacity(1.0);
-                label.SetTintColor(HG_Cyan());
-            } else if hovered {
-                bg.SetTintColor(HG_Color(0.16, 0.18, 0.22));
-                bar.SetTintColor(HG_Cyan());
-                bar.SetOpacity(1.0);
-                label.SetTintColor(HG_White());
+                label.SetTintColor(HG_ActiveRed());
+                sub.SetTintColor(HG_Red());
             } else {
-                bg.SetTintColor(HG_Color(0.09, 0.10, 0.13));
-                bar.SetTintColor(HG_Grey());
-                bar.SetOpacity(0.4);
-                label.SetTintColor(HG_White());
+                bg.SetTintColor(HG_DarkRed());
+                bg.SetOpacity(0.55);
+                frame.SetTintColor(HG_MildRed());
+                frame.SetOpacity(0.7);
+                bar.SetTintColor(HG_MildRed());
+                bar.SetOpacity(0.6);
+                label.SetTintColor(HG_Red());
+                sub.SetTintColor(HG_MildRed());
             }
         }
     }
@@ -302,10 +331,15 @@ public class HairGridOverlay extends inkCustomController {
         let bg = new inkRectangle();
         bg.SetName(n"bg");
         bg.SetAnchor(inkEAnchor.Fill);
-        bg.SetTintColor(HG_Color(0.12, 0.14, 0.18));
+        bg.SetTintColor(HG_DarkRed());
+        bg.SetOpacity(0.8);
         bg.Reparent(btn);
 
-        let label = HG_MakeText(text, 34, n"Semi-Bold", HG_Cyan());
+        let frame = HG_AddFrame(btn, HG_Red(), 2.0, 0.8);
+        frame.SetName(n"frame");
+
+        let label = HG_MakeText(text, 34, n"Semi-Bold", HG_Red());
+        label.SetName(n"label");
         label.SetAnchor(inkEAnchor.Centered);
         label.SetAnchorPoint(new Vector2(0.5, 0.5));
         label.Reparent(btn);
@@ -345,12 +379,18 @@ public class HairGridOverlay extends inkCustomController {
     }
 
     protected cb func OnButtonHoverOver(e: ref<inkPointerEvent>) -> Bool {
-        (e.GetCurrentTarget() as inkCompoundWidget).GetWidget(n"bg").SetTintColor(HG_Color(0.22, 0.26, 0.32));
+        let btn = e.GetCurrentTarget() as inkCompoundWidget;
+        btn.GetWidget(n"bg").SetTintColor(HG_HoverRed());
+        btn.GetWidget(n"frame").SetOpacity(1.0);
+        btn.GetWidget(n"label").SetTintColor(HG_ActiveRed());
         return false;
     }
 
     protected cb func OnButtonHoverOut(e: ref<inkPointerEvent>) -> Bool {
-        (e.GetCurrentTarget() as inkCompoundWidget).GetWidget(n"bg").SetTintColor(HG_Color(0.12, 0.14, 0.18));
+        let btn = e.GetCurrentTarget() as inkCompoundWidget;
+        btn.GetWidget(n"bg").SetTintColor(HG_DarkRed());
+        btn.GetWidget(n"frame").SetOpacity(0.8);
+        btn.GetWidget(n"label").SetTintColor(HG_Red());
         return false;
     }
 
@@ -388,7 +428,7 @@ public class HairGridOverlay extends inkCustomController {
     }
 }
 
-// ---- styling helpers ----
+// ---- helpers ----
 
 // Tiles are named "hair_tile_<index>".
 public func HG_TileIndex(widget: wref<inkWidget>) -> Int32 {
@@ -402,24 +442,59 @@ public func HG_TileIndex(widget: wref<inkWidget>) -> Int32 {
     return StringToInt(StrAfterFirst(name, "hair_tile_"), -1);
 }
 
+// Hard cap as a backstop in case the engine's overflow policy doesn't clip.
+public func HG_Ellipsize(text: String, maxChars: Int32) -> String {
+    if StrLen(text) <= maxChars {
+        return text;
+    }
+    return StrLeft(text, maxChars - 3) + "...";
+}
+
+// 1px-style outline made of four edges; returned canvas is named by the caller.
+public func HG_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickness: Float, opacity: Float) -> ref<inkCanvas> {
+    let frame = new inkCanvas();
+    frame.SetAnchor(inkEAnchor.Fill);
+    frame.SetTintColor(color);
+    frame.SetOpacity(opacity);
+
+    let top = new inkRectangle();
+    top.SetAnchor(inkEAnchor.TopFillHorizontaly);
+    top.SetSize(new Vector2(100.0, thickness));
+    top.Reparent(frame);
+
+    let bottom = new inkRectangle();
+    bottom.SetAnchor(inkEAnchor.BottomFillHorizontaly);
+    bottom.SetSize(new Vector2(100.0, thickness));
+    bottom.Reparent(frame);
+
+    let left = new inkRectangle();
+    left.SetAnchor(inkEAnchor.LeftFillVerticaly);
+    left.SetSize(new Vector2(thickness, 100.0));
+    left.Reparent(frame);
+
+    let right = new inkRectangle();
+    right.SetAnchor(inkEAnchor.RightFillVerticaly);
+    right.SetSize(new Vector2(thickness, 100.0));
+    right.Reparent(frame);
+
+    frame.Reparent(parent);
+    return frame;
+}
+
+// Palette from base\gameplay\gui\common\main_colors.inkstyle (MainColors.*).
+public func HG_Red() -> HDRColor = new HDRColor(1.176, 0.381, 0.348, 1.0)
+public func HG_ActiveRed() -> HDRColor = new HDRColor(1.370, 0.444, 0.405, 1.0)
+public func HG_MildRed() -> HDRColor = new HDRColor(0.682, 0.231, 0.212, 1.0)
+public func HG_DarkRed() -> HDRColor = new HDRColor(0.263, 0.086, 0.094, 1.0)
+public func HG_HoverRed() -> HDRColor = new HDRColor(0.412, 0.086, 0.090, 1.0)  // Fullscreen_SecondaryBackground4
+public func HG_PanelBg() -> HDRColor = new HDRColor(0.055, 0.035, 0.050, 1.0)   // near Fullscreen_PrimaryBackgroundDarkest, red-shifted
+public func HG_Blue() -> HDRColor = new HDRColor(0.369, 0.965, 1.0, 1.0)
+public func HG_MildBlue() -> HDRColor = new HDRColor(0.204, 0.569, 0.592, 1.0)
+public func HG_FaintBlue() -> HDRColor = new HDRColor(0.090, 0.173, 0.180, 1.0)
+public func HG_Black() -> HDRColor = new HDRColor(0.0, 0.0, 0.0, 1.0)
+
 public func HG_Color(r: Float, g: Float, b: Float) -> HDRColor {
     return new HDRColor(r, g, b, 1.0);
-}
-
-public func HG_Red() -> HDRColor {
-    return HG_Color(1.0, 0.38, 0.33);
-}
-
-public func HG_Cyan() -> HDRColor {
-    return HG_Color(0.37, 0.96, 1.0);
-}
-
-public func HG_White() -> HDRColor {
-    return HG_Color(0.92, 0.94, 0.96);
-}
-
-public func HG_Grey() -> HDRColor {
-    return HG_Color(0.55, 0.58, 0.62);
 }
 
 public func HG_MakeText(text: String, size: Int32, style: CName, color: HDRColor) -> ref<inkText> {
