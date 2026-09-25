@@ -30,7 +30,7 @@ The rows are listed in `CCUI_IsGridSlot` in `GridTargets.reds`:
   - Favorites are listed first, gold-starred, and counted per category in the header.
   - They're keyed as `<uiSlot>:<internal name>`, so they survive mods being added or removed, and they're shared across all saves (Codeware persistent storage).
   - Clicking the star doesn't apply the entry. A short notice ("Added to favorites: …" / "Removed from favorites: …") appears above the buttons and fades out.
-- **PREV/NEXT** change page. **CLOSE**, or Esc, closes the grid.
+- **Paging:** with one or two pages, `< PREV` / `NEXT >` (wrapping around). With more than two pages the footer becomes `FIRST` `<<` `>>` `LAST`. **CLOSE**, or Esc, closes the grid.
 - While a grid is open, confirm and randomize inputs are blocked so a stray click can't finish character creation.
 - The vanilla ◁ ▷ arrows keep working.
 - Not supported yet: thumbnails, gamepad navigation in the grid, hotkeys.

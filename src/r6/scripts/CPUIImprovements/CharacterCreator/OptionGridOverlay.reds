@@ -13,6 +13,10 @@ public class OptionGridOverlay extends inkCustomController {
     private let m_title: wref<inkText>;
     private let m_info: wref<inkText>;
     private let m_toast: wref<inkHorizontalPanel>;
+    private let m_firstBtn: wref<inkCanvas>;
+    private let m_lastBtn: wref<inkCanvas>;
+    private let m_prevBtn: wref<inkCanvas>;
+    private let m_nextBtn: wref<inkCanvas>;
     private let m_toastIcon: wref<inkImage>;
     private let m_toastText: wref<inkText>;
     private let m_tiles: array<wref<inkCanvas>>;
@@ -133,9 +137,22 @@ public class OptionGridOverlay extends inkCustomController {
         footer.SetMargin(inkMargin(0.0, 16.0, 0.0, 0.0));
         footer.Reparent(content);
 
-        this.MakeButton("< PREV", n"OnPrevRelease").Reparent(footer);
-        this.MakeButton("NEXT >", n"OnNextRelease").Reparent(footer);
-        this.MakeButton("CLOSE", n"OnCloseRelease").Reparent(footer);
+        // With more than two pages: FIRST << >> LAST; otherwise < PREV / NEXT > (see UpdatePaging).
+        let firstBtn = this.MakeButton("FIRST", n"OnFirstRelease", 190.0);
+        firstBtn.SetAffectsLayoutWhenHidden(false);
+        firstBtn.Reparent(footer);
+        let prevBtn = this.MakeButton("< PREV", n"OnPrevRelease", 200.0);
+        prevBtn.Reparent(footer);
+        let nextBtn = this.MakeButton("NEXT >", n"OnNextRelease", 200.0);
+        nextBtn.Reparent(footer);
+        let lastBtn = this.MakeButton("LAST", n"OnLastRelease", 190.0);
+        lastBtn.SetAffectsLayoutWhenHidden(false);
+        lastBtn.Reparent(footer);
+        this.MakeButton("CLOSE", n"OnCloseRelease", 220.0).Reparent(footer);
+        this.m_firstBtn = firstBtn;
+        this.m_lastBtn = lastBtn;
+        this.m_prevBtn = prevBtn;
+        this.m_nextBtn = nextBtn;
 
         this.m_grid = grid;
         this.m_title = title;
@@ -415,12 +432,21 @@ public class OptionGridOverlay extends inkCustomController {
         let info = this.GetInfo();
         let favCount = IsDefined(favs) && IsDefined(info) ? favs.CountFor(info.uiSlot) : 0;
         this.m_info.SetText(s"\(this.GetCount()) options  ·  \(favCount) fav  ·  page \(this.m_page + 1)/\(this.PageCount())  ·  current #\(this.GetCurrent())");
+        this.UpdatePaging();
     }
 
-    private func MakeButton(text: String, callback: CName) -> ref<inkCanvas> {
+    private func UpdatePaging() {
+        let many = this.PageCount() > 2;
+        this.m_firstBtn.SetVisible(many);
+        this.m_lastBtn.SetVisible(many);
+        (this.m_prevBtn.GetWidget(n"label") as inkText).SetText(many ? "<<" : "< PREV");
+        (this.m_nextBtn.GetWidget(n"label") as inkText).SetText(many ? ">>" : "NEXT >");
+    }
+
+    private func MakeButton(text: String, callback: CName, width: Float) -> ref<inkCanvas> {
         let btn = new inkCanvas();
-        btn.SetSize(Vector2(260.0, 80.0));
-        btn.SetMargin(inkMargin(0.0, 0.0, 24.0, 0.0));
+        btn.SetSize(Vector2(width, 80.0));
+        btn.SetMargin(inkMargin(0.0, 0.0, 20.0, 0.0));
         btn.SetInteractive(true);
 
         let bg = new inkRectangle();
@@ -528,6 +554,27 @@ public class OptionGridOverlay extends inkCustomController {
         btn.GetWidget(n"frame").SetOpacity(0.8);
         btn.GetWidget(n"label").SetTintColor(CCUI_Red());
         return false;
+    }
+
+    protected cb func OnFirstRelease(e: ref<inkPointerEvent>) -> Bool {
+        if e.IsAction(n"click") && this.m_page != 0 {
+            this.m_page = 0;
+            this.m_hovered = -1;
+            this.Rebuild();
+        }
+        e.Handle();
+        return true;
+    }
+
+    protected cb func OnLastRelease(e: ref<inkPointerEvent>) -> Bool {
+        let last = this.PageCount() - 1;
+        if e.IsAction(n"click") && this.m_page != last {
+            this.m_page = last;
+            this.m_hovered = -1;
+            this.Rebuild();
+        }
+        e.Handle();
+        return true;
     }
 
     protected cb func OnPrevRelease(e: ref<inkPointerEvent>) -> Bool {
