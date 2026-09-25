@@ -381,7 +381,7 @@ public class OptionGridOverlay extends inkCustomController {
             if selected {
                 bg.SetTintColor(CCUI_FaintBlue());
                 bg.SetOpacity(0.9);
-                frame.SetTintColor(CCUI_Blue());
+                CCUI_SetTint(frame, CCUI_Blue());
                 frame.SetOpacity(1.0);
                 bar.SetTintColor(CCUI_Blue());
                 bar.SetOpacity(1.0);
@@ -390,7 +390,7 @@ public class OptionGridOverlay extends inkCustomController {
             } else if hovered {
                 bg.SetTintColor(CCUI_HoverRed());
                 bg.SetOpacity(0.9);
-                frame.SetTintColor(CCUI_Red());
+                CCUI_SetTint(frame, CCUI_Red());
                 frame.SetOpacity(1.0);
                 bar.SetTintColor(CCUI_Red());
                 bar.SetOpacity(1.0);
@@ -399,7 +399,7 @@ public class OptionGridOverlay extends inkCustomController {
             } else {
                 bg.SetTintColor(CCUI_DarkRed());
                 bg.SetOpacity(0.55);
-                frame.SetTintColor(CCUI_MildRed());
+                CCUI_SetTint(frame, CCUI_MildRed());
                 frame.SetOpacity(0.7);
                 bar.SetTintColor(CCUI_MildRed());
                 bar.SetOpacity(0.6);
@@ -552,7 +552,7 @@ public class OptionGridOverlay extends inkCustomController {
         btn.GetWidget(n"label").SetTintColor(CCUI_ActiveRed());
         let chevron = btn.GetWidget(n"chevron");
         if IsDefined(chevron) {
-            chevron.SetTintColor(CCUI_ActiveRed());
+            CCUI_SetTint(chevron, CCUI_ActiveRed());
         }
         return false;
     }
@@ -564,7 +564,7 @@ public class OptionGridOverlay extends inkCustomController {
         btn.GetWidget(n"label").SetTintColor(CCUI_Red());
         let chevron = btn.GetWidget(n"chevron");
         if IsDefined(chevron) {
-            chevron.SetTintColor(CCUI_Red());
+            CCUI_SetTint(chevron, CCUI_Red());
         }
         return false;
     }
@@ -651,7 +651,6 @@ public func CCUI_AddChevron(parent: ref<inkCompoundWidget>, pointLeft: Bool) {
     chevron.SetAnchor(inkEAnchor.Centered);
     chevron.SetAnchorPoint(Vector2(0.5, 0.5));
     chevron.SetSize(Vector2(w, h));
-    chevron.SetTintColor(CCUI_Red());
     chevron.SetVisible(false);
 
     let tipX = pointLeft ? (w - reach) / 2.0 : (w + reach) / 2.0;
@@ -677,6 +676,7 @@ public func CCUI_AddChevron(parent: ref<inkCompoundWidget>, pointLeft: Bool) {
     lower.SetRotation(-upperAngle);
     lower.Reparent(chevron);
 
+    CCUI_SetTint(chevron, CCUI_Red());
     chevron.Reparent(parent);
 }
 
@@ -692,7 +692,6 @@ public func CCUI_Ellipsize(text: String, maxChars: Int32) -> String {
 public func CCUI_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickness: Float, opacity: Float) -> ref<inkCanvas> {
     let frame = new inkCanvas();
     frame.SetAnchor(inkEAnchor.Fill);
-    frame.SetTintColor(color);
     frame.SetOpacity(opacity);
 
     let top = new inkRectangle();
@@ -715,8 +714,26 @@ public func CCUI_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thick
     right.SetSize(Vector2(thickness, 100.0));
     right.Reparent(frame);
 
+    CCUI_SetTint(frame, color);
     frame.Reparent(parent);
     return frame;
+}
+
+// Ink tint doesn't propagate to children (opacity does), so color a drawn
+// shape by tinting the container and every widget inside it.
+public func CCUI_SetTint(widget: wref<inkWidget>, color: HDRColor) {
+    if !IsDefined(widget) {
+        return;
+    }
+    widget.SetTintColor(color);
+    let compound = widget as inkCompoundWidget;
+    if IsDefined(compound) {
+        let i = 0;
+        while i < compound.GetNumChildren() {
+            CCUI_SetTint(compound.GetWidgetByIndex(i), color);
+            i += 1;
+        }
+    }
 }
 
 // Palette from base\gameplay\gui\common\main_colors.inkstyle (MainColors.*).

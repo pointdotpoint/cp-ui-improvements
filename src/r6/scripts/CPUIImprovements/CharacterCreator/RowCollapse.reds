@@ -88,8 +88,6 @@ public class OptionRowCollapser extends IScriptable {
         toggle.SetAnchor(inkEAnchor.TopLeft);
         toggle.SetSize(Vector2(36.0, 36.0));
         toggle.SetInteractive(true);
-        toggle.SetTintColor(CCUI_Red());
-        toggle.SetOpacity(0.6);
         let hit = new inkRectangle();
         hit.SetAnchor(inkEAnchor.Fill);
         hit.SetOpacity(0.01);
@@ -105,6 +103,9 @@ public class OptionRowCollapser extends IScriptable {
         plus.SetAnchorPoint(Vector2(0.5, 0.5));
         plus.SetSize(Vector2(3.0, 18.0));
         plus.Reparent(toggle);
+        // Same red as the row names (MainColors.Red); tinted per widget since tint doesn't inherit.
+        CCUI_SetTint(toggle, CCUI_Red());
+        hit.SetTintColor(CCUI_Black());
         toggle.RegisterToCallback(n"OnRelease", this, n"OnToggleRelease");
         toggle.RegisterToCallback(n"OnHoverOver", this, n"OnToggleHoverOver");
         toggle.RegisterToCallback(n"OnHoverOut", this, n"OnToggleHoverOut");
@@ -172,12 +173,12 @@ public class OptionRowCollapser extends IScriptable {
     }
 
     protected cb func OnToggleHoverOver(e: ref<inkPointerEvent>) -> Bool {
-        this.m_toggle.SetOpacity(1.0);
+        CCUI_SetTint(this.m_toggle, CCUI_ActiveRed());
         return false;
     }
 
     protected cb func OnToggleHoverOut(e: ref<inkPointerEvent>) -> Bool {
-        this.m_toggle.SetOpacity(0.6);
+        CCUI_SetTint(this.m_toggle, CCUI_Red());
         return false;
     }
 }
