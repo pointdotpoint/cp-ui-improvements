@@ -7,6 +7,7 @@ Cyberpunk 2077 UI tweaks. First one: **Hair Grid**. It adds a paged, clickable g
 - The **HAIRSTYLE** row gets the same `< ▦ >` layout as Skin Tone / Hair Color. The middle ▦ button opens the grid. It works in New Game and in edit mode (mirror/ripperdoc).
 - The grid opens on the right, over the option list, so the model stays visible. It shows 30 styles per page (3×10). Each tile shows its index, the display name and the internal option name, so CCXL hairs that share a display name can be told apart.
 - The current style is highlighted. Clicking a tile applies it right away, and the grid stays open so you can try several styles in a row.
+- **Favorites:** click the star in a tile's top-right corner to favorite or unfavorite it. Favorites are listed first, gold-starred. They're keyed by the internal hair name, so they survive hair mods being added or removed, and they're shared across all saves (Codeware persistent storage). Clicking the star doesn't apply the hair.
 - **PREV/NEXT** change page. **CLOSE**, or the game's back key (Esc), closes the grid.
 - While the grid is open, confirm and randomize inputs are blocked so a stray click can't finish character creation.
 - The vanilla left/right switcher is untouched.
@@ -36,6 +37,7 @@ The first run builds `redscript-cli` v0.5.31 into `.tools/`. That version matche
   - `HG_Apply`, which mirrors vanilla `OnSliderChange` → `ApplyChangeToOption`
 - `src/r6/scripts/CPUIImprovements/HairGrid/SelectorGallery.reds`: restyles the hairstyle `Selector` row (`characterCreationBodyMorphOption`) with the gallery art and adds the middle button.
 - `src/r6/scripts/CPUIImprovements/HairGrid/HairGridOverlay.reds`: the Codeware `inkCustomController` overlay.
+- `src/r6/scripts/CPUIImprovements/HairGrid/HairFavorites.reds`: the favorites store, a `ScriptableService` with a `persistent` `array<CName>`.
 
 Debug lines are written with Codeware `ModLog(n"HairGrid", ...)` and land in `<game>/bin/x64/plugins/cyber_engine_tweaks/gamelog.log` (flushed with a delay while the game runs).
 

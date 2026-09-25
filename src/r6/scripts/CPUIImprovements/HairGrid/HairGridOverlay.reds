@@ -16,6 +16,8 @@ public class HairGridOverlay extends inkCustomController {
     private let m_grid: wref<inkVerticalPanel>;
     private let m_info: wref<inkText>;
     private let m_tiles: array<wref<inkCanvas>>;
+    // Display order: favorites first (in list order), then the rest.
+    private let m_order: array<Int32>;
 
     private let m_cols: Int32;
     private let m_rows: Int32;
@@ -134,7 +136,8 @@ public class HairGridOverlay extends inkCustomController {
         if count <= 0 {
             return;
         }
-        this.m_page = this.GetCurrent() / this.PageSize();
+        this.BuildOrder();
+        this.m_page = Max(0, this.DisplayPos(this.GetCurrent())) / this.PageSize();
         this.Rebuild();
         this.GetRootWidget().SetVisible(true);
     }
@@ -180,6 +183,37 @@ public class HairGridOverlay extends inkCustomController {
         return count <= 0 ? 1 : (count - 1) / this.PageSize() + 1;
     }
 
+    private func BuildOrder() {
+        ArrayClear(this.m_order);
+        let info = this.GetInfo();
+        let favs = HairFavorites.Get();
+        let count = this.GetCount();
+        let rest: array<Int32>;
+        let i = 0;
+        while i < count {
+            if IsDefined(favs) && favs.Has(HG_HairKey(info.options[i])) {
+                ArrayPush(this.m_order, i);
+            } else {
+                ArrayPush(rest, i);
+            }
+            i += 1;
+        }
+        for index in rest {
+            ArrayPush(this.m_order, index);
+        }
+    }
+
+    private func DisplayPos(index: Int32) -> Int32 {
+        return ArrayFindFirst(this.m_order, index);
+    }
+
+    private func IsFavorite(index: Int32) -> Bool {
+        let info = this.GetInfo();
+        let favs = HairFavorites.Get();
+        return IsDefined(info) && IsDefined(favs) && index >= 0 && index < ArraySize(info.options)
+            && favs.Has(HG_HairKey(info.options[index]));
+    }
+
     // ---- building ----
 
     private func Rebuild() {
@@ -199,7 +233,8 @@ public class HairGridOverlay extends inkCustomController {
                 row.SetMargin(new inkMargin(0.0, 0.0, 0.0, this.m_gap));
                 row.Reparent(this.m_grid);
             }
-            let tile = this.MakeTile(i, info.options[i]);
+            let index = this.m_order[i];
+            let tile = this.MakeTile(index, info.options[index]);
             tile.Reparent(row);
             ArrayPush(this.m_tiles, tile);
             i += 1;
@@ -211,6 +246,7 @@ public class HairGridOverlay extends inkCustomController {
 
     private func MakeTile(index: Int32, entry: gameuiSwitcherOption) -> ref<inkCanvas> {
         let textW = this.m_tileW - 40.0;
+        let labelW = textW - 44.0; // room for the star
 
         let tile = new inkCanvas();
         tile.SetName(StringToName(s"hair_tile_\(index)"));
@@ -233,13 +269,13 @@ public class HairGridOverlay extends inkCustomController {
         bar.Reparent(tile);
 
         // Up to two lines, clipped with an ellipsis on the second.
-        let label = HG_MakeText(HG_Ellipsize(this.GetLabel(entry), 50), 30, n"Semi-Bold", HG_Red());
+        let label = HG_MakeText(HG_Ellipsize(this.GetLabel(entry), 46), 30, n"Semi-Bold", HG_Red());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.TopLeft);
         label.SetMargin(new inkMargin(20.0, 10.0, 0.0, 0.0));
         label.SetFitToContent(false);
-        label.SetSize(new Vector2(textW, 72.0));
-        label.SetWrapping(true, textW);
+        label.SetSize(new Vector2(labelW, 72.0));
+        label.SetWrapping(true, labelW);
         label.SetOverflowPolicy(textOverflowPolicy.DotsEndLastLine);
         label.Reparent(tile);
 
@@ -254,6 +290,21 @@ public class HairGridOverlay extends inkCustomController {
         sub.SetSize(new Vector2(textW, 28.0));
         sub.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
         sub.Reparent(tile);
+
+        // Favorite toggle; its clicks are kept from applying the hair (see OnTileRelease).
+        let star = new inkImage();
+        star.SetName(n"star");
+        star.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
+        star.SetTexturePart(n"icon_star");
+        star.SetAnchor(inkEAnchor.TopRight);
+        star.SetAnchorPoint(new Vector2(1.0, 0.0));
+        star.SetMargin(new inkMargin(0.0, 10.0, 10.0, 0.0));
+        star.SetSize(new Vector2(38.0, 38.0));
+        star.SetInteractive(true);
+        star.RegisterToCallback(n"OnRelease", this, n"OnStarRelease");
+        star.RegisterToCallback(n"OnHoverOver", this, n"OnStarHoverOver");
+        star.RegisterToCallback(n"OnHoverOut", this, n"OnStarHoverOut");
+        star.Reparent(tile);
 
         tile.RegisterToCallback(n"OnRelease", this, n"OnTileRelease");
         tile.RegisterToCallback(n"OnHoverOver", this, n"OnTileHoverOver");
@@ -286,6 +337,14 @@ public class HairGridOverlay extends inkCustomController {
             let bar = tile.GetWidget(n"bar");
             let label = tile.GetWidget(n"label");
             let sub = tile.GetWidget(n"sub");
+            let star = tile.GetWidget(n"star");
+            if this.IsFavorite(index) {
+                star.SetTintColor(HG_Gold());
+                star.SetOpacity(1.0);
+            } else {
+                star.SetTintColor(hovered ? HG_Red() : HG_MildRed());
+                star.SetOpacity(hovered ? 0.9 : 0.45);
+            }
 
             if selected {
                 bg.SetTintColor(HG_FaintBlue());
@@ -319,7 +378,9 @@ public class HairGridOverlay extends inkCustomController {
     }
 
     private func UpdateInfo() {
-        this.m_info.SetText(s"\(this.GetCount()) styles  ·  page \(this.m_page + 1)/\(this.PageCount())  ·  current #\(this.GetCurrent())");
+        let favs = HairFavorites.Get();
+        let favCount = IsDefined(favs) ? favs.Count() : 0;
+        this.m_info.SetText(s"\(this.GetCount()) styles  ·  \(favCount) fav  ·  page \(this.m_page + 1)/\(this.PageCount())  ·  current #\(this.GetCurrent())");
     }
 
     private func MakeButton(text: String, callback: CName) -> ref<inkCanvas> {
@@ -353,6 +414,9 @@ public class HairGridOverlay extends inkCustomController {
     // ---- callbacks ----
 
     protected cb func OnTileRelease(e: ref<inkPointerEvent>) -> Bool {
+        if Equals(e.GetTarget().GetName(), n"star") {
+            return false;
+        }
         if e.IsAction(n"click") {
             let index = HG_TileIndex(e.GetCurrentTarget());
             HG_Log(s"click tile #\(index)");
@@ -362,6 +426,42 @@ public class HairGridOverlay extends inkCustomController {
         }
         e.Handle();
         return true;
+    }
+
+    protected cb func OnStarRelease(e: ref<inkPointerEvent>) -> Bool {
+        if e.IsAction(n"click") {
+            let tile = e.GetCurrentTarget().GetParentWidget();
+            let index = HG_TileIndex(tile);
+            let info = this.GetInfo();
+            let favs = HairFavorites.Get();
+            if index >= 0 && IsDefined(info) && IsDefined(favs) {
+                let now = favs.Toggle(HG_HairKey(info.options[index]));
+                HG_Log(s"favorite #\(index) -> \(now) (\(favs.Count()) total)");
+                if IsDefined(this.m_menu) {
+                    this.m_menu.PlaySound(n"Button", n"OnPress");
+                }
+                // Re-sort but stay on the same page.
+                this.BuildOrder();
+                this.m_page = Min(this.m_page, this.PageCount() - 1);
+                this.Rebuild();
+            }
+        }
+        e.Handle();
+        return true;
+    }
+
+    protected cb func OnStarHoverOver(e: ref<inkPointerEvent>) -> Bool {
+        let star = e.GetCurrentTarget();
+        if !this.IsFavorite(HG_TileIndex(star.GetParentWidget())) {
+            star.SetTintColor(HG_Gold());
+            star.SetOpacity(0.8);
+        }
+        return false;
+    }
+
+    protected cb func OnStarHoverOut(e: ref<inkPointerEvent>) -> Bool {
+        this.RestyleTiles();
+        return false;
     }
 
     protected cb func OnTileHoverOver(e: ref<inkPointerEvent>) -> Bool {
@@ -491,6 +591,7 @@ public func HG_PanelBg() -> HDRColor = new HDRColor(0.055, 0.035, 0.050, 1.0)   
 public func HG_Blue() -> HDRColor = new HDRColor(0.369, 0.965, 1.0, 1.0)
 public func HG_MildBlue() -> HDRColor = new HDRColor(0.204, 0.569, 0.592, 1.0)
 public func HG_FaintBlue() -> HDRColor = new HDRColor(0.090, 0.173, 0.180, 1.0)
+public func HG_Gold() -> HDRColor = new HDRColor(1.119, 0.844, 0.257, 1.0)
 public func HG_Black() -> HDRColor = new HDRColor(0.0, 0.0, 0.0, 1.0)
 
 public func HG_Color(r: Float, g: Float, b: Float) -> HDRColor {
