@@ -1,14 +1,17 @@
-[size=5][b]Hair Grid[/b][/size]
-[i]Browse every hairstyle at once in the character creator, instead of clicking through them one by one.[/i]
+[size=5][b]Character Creator UI Improvements[/b][/size]
+[i]Browse hairstyles, noses, tattoos, piercings and more in a grid, with favorites, instead of clicking through them one by one.[/i]
 
-With a few hundred CCXL hairs installed, the vanilla hairstyle selector means clicking ◁ ▷ dozens of times to find the one you want. Hair Grid gives the [b]Hairstyle[/b] row the same [b]◁ ▦ ▷[/b] layout as Skin Tone and Hair Color. Click the middle button to open a paged grid of every style.
+With a few hundred CCXL hairs, tattoos and piercings installed, the vanilla selectors mean clicking ◁ ▷ dozens of times to find the one you want. This mod gives those rows the same [b]◁ ▦ ▷[/b] layout as Skin Tone and Hair Color. Click the middle button to open a paged grid of every option.
+
+[size=4][b]Rows with a grid[/b][/size]
+Hairstyle, mouth, nose, jaw, ears, cyberware, facial tattoos, piercings and eye makeup.
 
 [size=4][b]Features[/b][/size]
 [list]
-[*][b]Grid picker[/b]: 27 styles per page, with the vanilla UI's red look. Click a tile to apply it right away; the grid stays open so you can keep comparing.
-[*][b]Every hair[/b]: vanilla and all CCXL / ArchiveXL hair mods. Each tile shows the name plus the internal option name, so hairs that share a display name are easy to tell apart.
-[*][b]Favorites[/b]: click the star on a tile to pin it to the front of the list. Favorites are shared across all saves and are stored by hair name, so adding or removing hair mods doesn't mix them up.
-[*][b]Current hair highlighted[/b], and the grid opens on the page that contains it.
+[*][b]Grid picker[/b]: 27 entries per page, with the vanilla UI's red look. Click a tile to apply it right away; the grid stays open so you can keep comparing.
+[*][b]Every option[/b]: vanilla and modded (CCXL / ArchiveXL). Each tile shows the name plus the internal option name, so entries that share a display name are easy to tell apart.
+[*][b]Favorites[/b]: click the star on a tile to pin it to the front of that category. Favorites are shared across all saves and are stored by name, so adding or removing mods doesn't mix them up.
+[*][b]Current option highlighted[/b], and the grid opens on the page that contains it.
 [*]Works in the [b]New Game character creator[/b], at [b]mirrors[/b] and at [b]ripperdocs[/b].
 [*]The vanilla ◁ ▷ arrows keep working as before.
 [/list]
@@ -22,10 +25,10 @@ Tested on game version 2.31 with redscript 0.5.31 and Codeware 1.19.0.
 
 [size=4][b]Installation[/b][/size]
 Install with Vortex or Mod Organizer 2, or extract the archive into your Cyberpunk 2077 folder. You should end up with:
-[code]Cyberpunk 2077/r6/scripts/CPUIImprovements/HairGrid/*.reds[/code]
+[code]Cyberpunk 2077/r6/scripts/CPUIImprovements/CharacterCreator/*.reds[/code]
 
 [size=4][b]Uninstall[/b][/size]
-Delete [font=Courier New]r6/scripts/CPUIImprovements/HairGrid[/font]. Saves don't depend on this mod: it only changes the menu, and applies hair through the same game function the arrows use.
+Delete [font=Courier New]r6/scripts/CPUIImprovements/CharacterCreator[/font]. Saves don't depend on this mod: it only changes the menu, and applies options through the same game function the arrows use.
 
 [size=4][b]Known limitations[/b][/size]
 [list]
@@ -41,4 +44,4 @@ Delete [font=Courier New]r6/scripts/CPUIImprovements/HairGrid[/font]. Saves don'
 [/list]
 
 [size=4][b]Troubleshooting[/b][/size]
-The mod writes one line on startup, [font=Courier New][HairGrid] Hair Grid 1.0.0 ready[/font], to [font=Courier New]bin/x64/plugins/cyber_engine_tweaks/gamelog.log[/font] (Cyber Engine Tweaks). If the ▦ button doesn't appear, check that line and [font=Courier New]r6/logs/redscript_rCURRENT.log[/font] for errors, and include both in your bug report.
+The mod writes one line on startup, [font=Courier New][CCUIImprovements] Character Creator UI Improvements 1.0.0 ready[/font], to [font=Courier New]bin/x64/plugins/cyber_engine_tweaks/gamelog.log[/font] (Cyber Engine Tweaks). If the ▦ buttons don't appear, check that line and [font=Courier New]r6/logs/redscript_rCURRENT.log[/font] for errors, and include both in your bug report.

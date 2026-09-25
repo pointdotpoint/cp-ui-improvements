@@ -3,7 +3,7 @@
 #   scripts/check.sh          our sources + Codeware
 #   scripts/check.sh --full   also every installed r6/scripts mod and RED4ext plugin scripts
 #                             (catches conflicts with other mods hooking the same methods)
-#   scripts/check.sh --log    show HairGrid-related lines from the game's last redscript log
+#   scripts/check.sh --log    show mod-related lines from the game's last redscript log
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -14,7 +14,7 @@ SRC="$ROOT/src/r6/scripts/CPUIImprovements"
 
 if [[ "${1:-}" == "--log" ]]; then
     LOG="$GAME/r6/logs/redscript_rCURRENT.log"
-    grep -nE "ERROR|WARN|CPUIImprovements|HairGrid" "$LOG" || echo "no errors or HairGrid lines in $LOG"
+    grep -nE "ERROR|WARN|CPUIImprovements|CCUIImprovements" "$LOG" || echo "no errors or mod lines in $LOG"
     exit 0
 fi
 

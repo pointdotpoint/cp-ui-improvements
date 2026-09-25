@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pre-release validation for Hair Grid. Runs every offline check and builds the package.
+# Pre-release validation for Character Creator UI Improvements. Runs every offline check and builds the package.
 #
 #   1. lint                  redscript 0.5.31 linter
 #   2. compile (vanilla)     our scripts + Codeware against the game's script bundle
@@ -8,7 +8,7 @@
 #   5. compat (Nexus)        mods from a Nexus script dump that hook the same classes:
 #                            no shared hook targets, no replaceMethod on what we wrap,
 #                            and each one still compiles next to ours
-#   6. package               dist/HairGrid-<version>.zip, verified and compiled as shipped
+#   6. package               dist/CharacterCreatorUIImprovements-<version>.zip, verified and compiled as shipped
 #
 # Tools are built/cloned into .tools/ on first run.
 set -uo pipefail

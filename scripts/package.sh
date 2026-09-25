@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build the Nexus release archive and verify it.
-#   scripts/package.sh   ->  dist/HairGrid-<version>.zip
+#   scripts/package.sh   ->  dist/CharacterCreatorUIImprovements-<version>.zip
 #
 # The zip's root mirrors the game folder (r6/scripts/...), which is what
 # Vortex and manual "extract into the game folder" installs expect.
@@ -10,17 +10,17 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT/scripts/lib.sh"
 GAME="${CP2077_DIR:-$HOME/.local/share/Steam/steamapps/common/Cyberpunk 2077}"
 CLI="$ROOT/.tools/redscript-src/target/release/redscript-cli"
-MOD_REL="r6/scripts/CPUIImprovements/HairGrid"
+MOD_REL="r6/scripts/CPUIImprovements/CharacterCreator"
 SRC="$ROOT/src/$MOD_REL"
 
-VERSION="$(sed -nE 's/^public func HG_Version\(\) -> String = "([^"]+)".*/\1/p' "$SRC/HairGridInfo.reds")"
-[[ -n "$VERSION" ]] || { echo "could not read HG_Version() from HairGridInfo.reds" >&2; exit 1; }
-if grep -qE '^public func HG_DebugLogging\(\) -> Bool = true' "$SRC/HairGridInfo.reds"; then
-    echo "refusing to package: HG_DebugLogging() is true" >&2
+VERSION="$(sed -nE 's/^public func CCUI_Version\(\) -> String = "([^"]+)".*/\1/p' "$SRC/ModInfo.reds")"
+[[ -n "$VERSION" ]] || { echo "could not read CCUI_Version() from ModInfo.reds" >&2; exit 1; }
+if grep -qE '^public func CCUI_DebugLogging\(\) -> Bool = true' "$SRC/ModInfo.reds"; then
+    echo "refusing to package: CCUI_DebugLogging() is true" >&2
     exit 1
 fi
 
-OUT="$ROOT/dist/HairGrid-$VERSION.zip"
+OUT="$ROOT/dist/CharacterCreatorUIImprovements-$VERSION.zip"
 mkdir -p "$ROOT/dist"
 rm -f "$OUT"
 

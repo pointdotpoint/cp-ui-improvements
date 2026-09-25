@@ -1,15 +1,16 @@
-// Hair Grid overlay for the character creator.
-// Paged grid of every hairstyle option; clicking a tile applies it through the menu.
-module CPUIImprovements.HairGrid
+// Grid overlay for one character-creator option (hairstyle, nose, tattoos, ...).
+// Paged grid of every entry; clicking a tile applies it through the menu, the star favorites it.
+module CPUIImprovements.CharacterCreator
 import Codeware.UI.*
 
-public class HairGridOverlay extends inkCustomController {
+public class OptionGridOverlay extends inkCustomController {
     private let m_menu: wref<characterCreationBodyMorphMenu>;
     private let m_option: wref<CharacterCustomizationOption>;
     private let m_page: Int32;
     private let m_hovered: Int32;
 
     private let m_grid: wref<inkVerticalPanel>;
+    private let m_title: wref<inkText>;
     private let m_info: wref<inkText>;
     private let m_toast: wref<inkHorizontalPanel>;
     private let m_toastIcon: wref<inkImage>;
@@ -24,8 +25,8 @@ public class HairGridOverlay extends inkCustomController {
     private let m_tileH: Float;
     private let m_gap: Float;
 
-    public static func Create(menu: ref<characterCreationBodyMorphMenu>) -> ref<HairGridOverlay> {
-        let self = new HairGridOverlay();
+    public static func Create(menu: ref<characterCreationBodyMorphMenu>) -> ref<OptionGridOverlay> {
+        let self = new OptionGridOverlay();
         self.m_menu = menu;
         self.m_hovered = -1;
         // Layout in the 3840x2160 authoring space the creator uses.
@@ -40,7 +41,7 @@ public class HairGridOverlay extends inkCustomController {
 
     protected cb func OnCreate() {
         let root = new inkCanvas();
-        root.SetName(n"HairGridOverlay");
+        root.SetName(n"CCUIOptionGrid");
         root.SetAnchor(inkEAnchor.Fill);
         root.SetVisible(false);
 
@@ -48,7 +49,7 @@ public class HairGridOverlay extends inkCustomController {
         let backdrop = new inkRectangle();
         backdrop.SetName(n"backdrop");
         backdrop.SetAnchor(inkEAnchor.Fill);
-        backdrop.SetTintColor(HG_Black());
+        backdrop.SetTintColor(CCUI_Black());
         backdrop.SetOpacity(0.45);
         backdrop.SetInteractive(true);
         backdrop.RegisterToCallback(n"OnRelease", this, n"OnBackdropRelease");
@@ -72,16 +73,16 @@ public class HairGridOverlay extends inkCustomController {
 
         let panelBg = new inkRectangle();
         panelBg.SetAnchor(inkEAnchor.Fill);
-        panelBg.SetTintColor(HG_PanelBg());
+        panelBg.SetTintColor(CCUI_PanelBg());
         panelBg.SetOpacity(0.96);
         panelBg.Reparent(panel);
 
-        HG_AddFrame(panel, HG_MildRed(), 2.0, 0.8);
+        CCUI_AddFrame(panel, CCUI_MildRed(), 2.0, 0.8);
 
         let accent = new inkRectangle();
         accent.SetAnchor(inkEAnchor.TopFillHorizontaly);
         accent.SetSize(Vector2(100.0, 5.0));
-        accent.SetTintColor(HG_Red());
+        accent.SetTintColor(CCUI_Red());
         accent.Reparent(panel);
 
         let content = new inkVerticalPanel();
@@ -94,11 +95,11 @@ public class HairGridOverlay extends inkCustomController {
         header.SetMargin(inkMargin(0.0, 0.0, 0.0, 24.0));
         header.Reparent(content);
 
-        let title = HG_MakeText("HAIRSTYLES", 56, n"Semi-Bold", HG_Red());
+        let title = CCUI_MakeText("", 56, n"Semi-Bold", CCUI_Red());
         title.SetLetterCase(textLetterCase.UpperCase);
         title.Reparent(header);
 
-        let info = HG_MakeText("", 32, n"Medium", HG_MildRed());
+        let info = CCUI_MakeText("", 32, n"Medium", CCUI_MildRed());
         info.SetMargin(inkMargin(36.0, 16.0, 0.0, 0.0));
         info.Reparent(header);
 
@@ -123,7 +124,7 @@ public class HairGridOverlay extends inkCustomController {
         toastIcon.SetMargin(inkMargin(0.0, 0.0, 14.0, 0.0));
         toastIcon.Reparent(toast);
 
-        let toastText = HG_MakeText("", 32, n"Medium", HG_Gold());
+        let toastText = CCUI_MakeText("", 32, n"Medium", CCUI_Gold());
         toastText.SetVAlign(inkEVerticalAlign.Center);
         toastText.Reparent(toast);
 
@@ -137,6 +138,7 @@ public class HairGridOverlay extends inkCustomController {
         this.MakeButton("CLOSE", n"OnCloseRelease").Reparent(footer);
 
         this.m_grid = grid;
+        this.m_title = title;
         this.m_info = info;
         this.m_toast = toast;
         this.m_toastIcon = toastIcon;
@@ -154,10 +156,11 @@ public class HairGridOverlay extends inkCustomController {
     public func Open(option: wref<CharacterCustomizationOption>) {
         this.m_option = option;
         let count = this.GetCount();
-        HG_Log(s"open: \(count) options, current=\(this.GetCurrent())");
+        CCUI_Log(s"open \(NameToString(option.info.uiSlot)): \(count) entries, current=\(this.GetCurrent())");
         if count <= 0 {
             return;
         }
+        this.m_title.SetText(CCUI_Title(option.info));
         this.m_toast.StopAllAnimations();
         this.m_toast.SetOpacity(0.0);
         this.BuildOrder();
@@ -182,16 +185,13 @@ public class HairGridOverlay extends inkCustomController {
 
     // ---- data helpers ----
 
-    private func GetInfo() -> ref<gameuiSwitcherInfo> {
-        if !IsDefined(this.m_option) {
-            return null;
-        }
-        return this.m_option.info as gameuiSwitcherInfo;
+    private func GetInfo() -> ref<gameuiCharacterCustomizationInfo> {
+        return IsDefined(this.m_option) ? this.m_option.info : null;
     }
 
     private func GetCount() -> Int32 {
         let info = this.GetInfo();
-        return IsDefined(info) ? ArraySize(info.options) : 0;
+        return IsDefined(info) ? CCUI_EntryCount(info) : 0;
     }
 
     private func GetCurrent() -> Int32 {
@@ -210,12 +210,12 @@ public class HairGridOverlay extends inkCustomController {
     private func BuildOrder() {
         ArrayClear(this.m_order);
         let info = this.GetInfo();
-        let favs = HairFavorites.Get();
+        let favs = OptionFavorites.Get();
         let count = this.GetCount();
         let rest: array<Int32>;
         let i = 0;
         while i < count {
-            if IsDefined(favs) && favs.Has(HG_HairKey(info.options[i])) {
+            if IsDefined(favs) && favs.Has(CCUI_FavoriteKey(info, i)) {
                 ArrayPush(this.m_order, i);
             } else {
                 ArrayPush(rest, i);
@@ -233,9 +233,9 @@ public class HairGridOverlay extends inkCustomController {
 
     private func IsFavorite(index: Int32) -> Bool {
         let info = this.GetInfo();
-        let favs = HairFavorites.Get();
-        return IsDefined(info) && IsDefined(favs) && index >= 0 && index < ArraySize(info.options)
-            && favs.Has(HG_HairKey(info.options[index]));
+        let favs = OptionFavorites.Get();
+        return IsDefined(info) && IsDefined(favs) && index >= 0 && index < this.GetCount()
+            && favs.Has(CCUI_FavoriteKey(info, index));
     }
 
     // ---- building ----
@@ -244,7 +244,6 @@ public class HairGridOverlay extends inkCustomController {
         this.m_grid.RemoveAllChildren();
         ArrayClear(this.m_tiles);
 
-        let info = this.GetInfo();
         let count = this.GetCount();
         let first = this.m_page * this.PageSize();
         let last = Min(first + this.PageSize(), count);
@@ -258,7 +257,7 @@ public class HairGridOverlay extends inkCustomController {
                 row.Reparent(this.m_grid);
             }
             let index = this.m_order[i];
-            let tile = this.MakeTile(index, info.options[index]);
+            let tile = this.MakeTile(index);
             tile.Reparent(row);
             ArrayPush(this.m_tiles, tile);
             i += 1;
@@ -268,12 +267,13 @@ public class HairGridOverlay extends inkCustomController {
         this.UpdateInfo();
     }
 
-    private func MakeTile(index: Int32, entry: gameuiSwitcherOption) -> ref<inkCanvas> {
+    private func MakeTile(index: Int32) -> ref<inkCanvas> {
+        let info = this.GetInfo();
         let textW = this.m_tileW - 40.0;
         let labelW = textW - 44.0; // room for the star
 
         let tile = new inkCanvas();
-        tile.SetName(StringToName(s"hair_tile_\(index)"));
+        tile.SetName(StringToName(s"grid_tile_\(index)"));
         tile.SetSize(Vector2(this.m_tileW, this.m_tileH));
         tile.SetMargin(inkMargin(0.0, 0.0, this.m_gap, 0.0));
         tile.SetInteractive(true);
@@ -283,7 +283,7 @@ public class HairGridOverlay extends inkCustomController {
         bg.SetAnchor(inkEAnchor.Fill);
         bg.Reparent(tile);
 
-        let frame = HG_AddFrame(tile, HG_MildRed(), 2.0, 0.7);
+        let frame = CCUI_AddFrame(tile, CCUI_MildRed(), 2.0, 0.7);
         frame.SetName(n"frame");
 
         let bar = new inkRectangle();
@@ -293,7 +293,7 @@ public class HairGridOverlay extends inkCustomController {
         bar.Reparent(tile);
 
         // Up to two lines, clipped with an ellipsis on the second.
-        let label = HG_MakeText(HG_Ellipsize(this.GetLabel(entry), 46), 30, n"Semi-Bold", HG_Red());
+        let label = CCUI_MakeText(CCUI_Ellipsize(CCUI_EntryLabel(info, index), 46), 30, n"Semi-Bold", CCUI_Red());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.TopLeft);
         label.SetMargin(inkMargin(20.0, 10.0, 0.0, 0.0));
@@ -303,9 +303,9 @@ public class HairGridOverlay extends inkCustomController {
         label.SetOverflowPolicy(textOverflowPolicy.DotsEndLastLine);
         label.Reparent(tile);
 
-        // Index + internal name help tell apart CCXL hairs that share a display name.
-        let internal = ArraySize(entry.names) > 0 ? NameToString(entry.names[0]) : "";
-        let sub = HG_MakeText(HG_Ellipsize(s"#\(index)  \(internal)", 36), 22, n"Regular", HG_MildRed());
+        // Index + internal name help tell apart modded entries that share a display name.
+        let internal = NameToString(CCUI_EntryName(info, index));
+        let sub = CCUI_MakeText(CCUI_Ellipsize(s"#\(index)  \(internal)", 36), 22, n"Regular", CCUI_MildRed());
         sub.SetName(n"sub");
         sub.SetAnchor(inkEAnchor.BottomLeft);
         sub.SetAnchorPoint(Vector2(0.0, 1.0));
@@ -315,7 +315,7 @@ public class HairGridOverlay extends inkCustomController {
         sub.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
         sub.Reparent(tile);
 
-        // Favorite toggle; its clicks are kept from applying the hair (see OnTileRelease).
+        // Favorite toggle; its clicks are kept from applying the entry (see OnTileRelease).
         let star = new inkImage();
         star.SetName(n"star");
         star.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
@@ -337,22 +337,11 @@ public class HairGridOverlay extends inkCustomController {
         return tile;
     }
 
-    private func GetLabel(entry: gameuiSwitcherOption) -> String {
-        let label = GetLocalizedText(entry.localizedName);
-        if StrLen(label) == 0 {
-            label = entry.localizedName;
-        }
-        if StrLen(label) == 0 && ArraySize(entry.names) > 0 {
-            label = NameToString(entry.names[0]);
-        }
-        return label;
-    }
-
     // Vanilla option-row look: dark red fill, red frame and text; the active value is cyan.
     private func RestyleTiles() {
         let current = this.GetCurrent();
         for tile in this.m_tiles {
-            let index = HG_TileIndex(tile);
+            let index = CCUI_TileIndex(tile);
             let selected = index == current;
             let hovered = index == this.m_hovered;
 
@@ -363,50 +352,50 @@ public class HairGridOverlay extends inkCustomController {
             let sub = tile.GetWidget(n"sub");
             let star = tile.GetWidget(n"star");
             if this.IsFavorite(index) {
-                star.SetTintColor(HG_Gold());
+                star.SetTintColor(CCUI_Gold());
                 star.SetOpacity(1.0);
             } else {
-                star.SetTintColor(hovered ? HG_Red() : HG_MildRed());
+                star.SetTintColor(hovered ? CCUI_Red() : CCUI_MildRed());
                 star.SetOpacity(hovered ? 0.9 : 0.45);
             }
 
             if selected {
-                bg.SetTintColor(HG_FaintBlue());
+                bg.SetTintColor(CCUI_FaintBlue());
                 bg.SetOpacity(0.9);
-                frame.SetTintColor(HG_Blue());
+                frame.SetTintColor(CCUI_Blue());
                 frame.SetOpacity(1.0);
-                bar.SetTintColor(HG_Blue());
+                bar.SetTintColor(CCUI_Blue());
                 bar.SetOpacity(1.0);
-                label.SetTintColor(HG_Blue());
-                sub.SetTintColor(HG_MildBlue());
+                label.SetTintColor(CCUI_Blue());
+                sub.SetTintColor(CCUI_MildBlue());
             } else if hovered {
-                bg.SetTintColor(HG_HoverRed());
+                bg.SetTintColor(CCUI_HoverRed());
                 bg.SetOpacity(0.9);
-                frame.SetTintColor(HG_Red());
+                frame.SetTintColor(CCUI_Red());
                 frame.SetOpacity(1.0);
-                bar.SetTintColor(HG_Red());
+                bar.SetTintColor(CCUI_Red());
                 bar.SetOpacity(1.0);
-                label.SetTintColor(HG_ActiveRed());
-                sub.SetTintColor(HG_Red());
+                label.SetTintColor(CCUI_ActiveRed());
+                sub.SetTintColor(CCUI_Red());
             } else {
-                bg.SetTintColor(HG_DarkRed());
+                bg.SetTintColor(CCUI_DarkRed());
                 bg.SetOpacity(0.55);
-                frame.SetTintColor(HG_MildRed());
+                frame.SetTintColor(CCUI_MildRed());
                 frame.SetOpacity(0.7);
-                bar.SetTintColor(HG_MildRed());
+                bar.SetTintColor(CCUI_MildRed());
                 bar.SetOpacity(0.6);
-                label.SetTintColor(HG_Red());
-                sub.SetTintColor(HG_MildRed());
+                label.SetTintColor(CCUI_Red());
+                sub.SetTintColor(CCUI_MildRed());
             }
         }
     }
 
     private func ShowToast(added: Bool, name: String) {
-        let color = added ? HG_Gold() : HG_MildRed();
+        let color = added ? CCUI_Gold() : CCUI_MildRed();
         this.m_toastIcon.SetTintColor(color);
         this.m_toastIcon.SetOpacity(added ? 1.0 : 0.5);
         this.m_toastText.SetTintColor(color);
-        this.m_toastText.SetText(HG_Ellipsize((added ? "Added to favorites: " : "Removed from favorites: ") + name, 70));
+        this.m_toastText.SetText(CCUI_Ellipsize((added ? "Added to favorites: " : "Removed from favorites: ") + name, 70));
 
         // Restart: visible now, hold, then fade out.
         this.m_toast.StopAllAnimations();
@@ -422,9 +411,10 @@ public class HairGridOverlay extends inkCustomController {
     }
 
     private func UpdateInfo() {
-        let favs = HairFavorites.Get();
-        let favCount = IsDefined(favs) ? favs.Count() : 0;
-        this.m_info.SetText(s"\(this.GetCount()) styles  ·  \(favCount) fav  ·  page \(this.m_page + 1)/\(this.PageCount())  ·  current #\(this.GetCurrent())");
+        let favs = OptionFavorites.Get();
+        let info = this.GetInfo();
+        let favCount = IsDefined(favs) && IsDefined(info) ? favs.CountFor(info.uiSlot) : 0;
+        this.m_info.SetText(s"\(this.GetCount()) options  ·  \(favCount) fav  ·  page \(this.m_page + 1)/\(this.PageCount())  ·  current #\(this.GetCurrent())");
     }
 
     private func MakeButton(text: String, callback: CName) -> ref<inkCanvas> {
@@ -436,14 +426,14 @@ public class HairGridOverlay extends inkCustomController {
         let bg = new inkRectangle();
         bg.SetName(n"bg");
         bg.SetAnchor(inkEAnchor.Fill);
-        bg.SetTintColor(HG_DarkRed());
+        bg.SetTintColor(CCUI_DarkRed());
         bg.SetOpacity(0.8);
         bg.Reparent(btn);
 
-        let frame = HG_AddFrame(btn, HG_Red(), 2.0, 0.8);
+        let frame = CCUI_AddFrame(btn, CCUI_Red(), 2.0, 0.8);
         frame.SetName(n"frame");
 
-        let label = HG_MakeText(text, 34, n"Semi-Bold", HG_Red());
+        let label = CCUI_MakeText(text, 34, n"Semi-Bold", CCUI_Red());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.Centered);
         label.SetAnchorPoint(Vector2(0.5, 0.5));
@@ -462,10 +452,10 @@ public class HairGridOverlay extends inkCustomController {
             return false;
         }
         if e.IsAction(n"click") {
-            let index = HG_TileIndex(e.GetCurrentTarget());
-            HG_Log(s"click tile #\(index)");
+            let index = CCUI_TileIndex(e.GetCurrentTarget());
+            CCUI_Log(s"click tile #\(index)");
             if index >= 0 && IsDefined(this.m_menu) {
-                this.m_menu.HG_Apply(index);
+                this.m_menu.CCUI_Apply(index);
             }
         }
         e.Handle();
@@ -475,13 +465,14 @@ public class HairGridOverlay extends inkCustomController {
     protected cb func OnStarRelease(e: ref<inkPointerEvent>) -> Bool {
         if e.IsAction(n"click") {
             let tile = e.GetCurrentTarget().GetParentWidget();
-            let index = HG_TileIndex(tile);
+            let index = CCUI_TileIndex(tile);
             let info = this.GetInfo();
-            let favs = HairFavorites.Get();
+            let favs = OptionFavorites.Get();
             if index >= 0 && IsDefined(info) && IsDefined(favs) {
-                let now = favs.Toggle(HG_HairKey(info.options[index]));
-                HG_Log(s"favorite #\(index) -> \(now) (\(favs.Count()) total)");
-                this.ShowToast(now, this.GetLabel(info.options[index]));
+                let key = CCUI_FavoriteKey(info, index);
+                let now = favs.Toggle(key);
+                CCUI_Log(s"favorite \(NameToString(key)) -> \(now)");
+                this.ShowToast(now, CCUI_EntryLabel(info, index));
                 if IsDefined(this.m_menu) {
                     this.m_menu.PlaySound(n"Button", n"OnPress");
                 }
@@ -497,8 +488,8 @@ public class HairGridOverlay extends inkCustomController {
 
     protected cb func OnStarHoverOver(e: ref<inkPointerEvent>) -> Bool {
         let star = e.GetCurrentTarget();
-        if !this.IsFavorite(HG_TileIndex(star.GetParentWidget())) {
-            star.SetTintColor(HG_Gold());
+        if !this.IsFavorite(CCUI_TileIndex(star.GetParentWidget())) {
+            star.SetTintColor(CCUI_Gold());
             star.SetOpacity(0.8);
         }
         return false;
@@ -510,13 +501,13 @@ public class HairGridOverlay extends inkCustomController {
     }
 
     protected cb func OnTileHoverOver(e: ref<inkPointerEvent>) -> Bool {
-        this.m_hovered = HG_TileIndex(e.GetCurrentTarget());
+        this.m_hovered = CCUI_TileIndex(e.GetCurrentTarget());
         this.RestyleTiles();
         return false;
     }
 
     protected cb func OnTileHoverOut(e: ref<inkPointerEvent>) -> Bool {
-        if this.m_hovered == HG_TileIndex(e.GetCurrentTarget()) {
+        if this.m_hovered == CCUI_TileIndex(e.GetCurrentTarget()) {
             this.m_hovered = -1;
             this.RestyleTiles();
         }
@@ -525,17 +516,17 @@ public class HairGridOverlay extends inkCustomController {
 
     protected cb func OnButtonHoverOver(e: ref<inkPointerEvent>) -> Bool {
         let btn = e.GetCurrentTarget() as inkCompoundWidget;
-        btn.GetWidget(n"bg").SetTintColor(HG_HoverRed());
+        btn.GetWidget(n"bg").SetTintColor(CCUI_HoverRed());
         btn.GetWidget(n"frame").SetOpacity(1.0);
-        btn.GetWidget(n"label").SetTintColor(HG_ActiveRed());
+        btn.GetWidget(n"label").SetTintColor(CCUI_ActiveRed());
         return false;
     }
 
     protected cb func OnButtonHoverOut(e: ref<inkPointerEvent>) -> Bool {
         let btn = e.GetCurrentTarget() as inkCompoundWidget;
-        btn.GetWidget(n"bg").SetTintColor(HG_DarkRed());
+        btn.GetWidget(n"bg").SetTintColor(CCUI_DarkRed());
         btn.GetWidget(n"frame").SetOpacity(0.8);
-        btn.GetWidget(n"label").SetTintColor(HG_Red());
+        btn.GetWidget(n"label").SetTintColor(CCUI_Red());
         return false;
     }
 
@@ -561,7 +552,7 @@ public class HairGridOverlay extends inkCustomController {
 
     protected cb func OnCloseRelease(e: ref<inkPointerEvent>) -> Bool {
         if e.IsAction(n"click") && IsDefined(this.m_menu) {
-            this.m_menu.HG_Close();
+            this.m_menu.CCUI_Close();
         }
         e.Handle();
         return true;
@@ -575,20 +566,20 @@ public class HairGridOverlay extends inkCustomController {
 
 // ---- helpers ----
 
-// Tiles are named "hair_tile_<index>".
-public func HG_TileIndex(widget: wref<inkWidget>) -> Int32 {
+// Tiles are named "grid_tile_<index>".
+public func CCUI_TileIndex(widget: wref<inkWidget>) -> Int32 {
     if !IsDefined(widget) {
         return -1;
     }
     let name = NameToString(widget.GetName());
-    if !StrBeginsWith(name, "hair_tile_") {
+    if !StrBeginsWith(name, "grid_tile_") {
         return -1;
     }
-    return StringToInt(StrAfterFirst(name, "hair_tile_"), -1);
+    return StringToInt(StrAfterFirst(name, "grid_tile_"), -1);
 }
 
 // Hard cap as a backstop in case the engine's overflow policy doesn't clip.
-public func HG_Ellipsize(text: String, maxChars: Int32) -> String {
+public func CCUI_Ellipsize(text: String, maxChars: Int32) -> String {
     if StrLen(text) <= maxChars {
         return text;
     }
@@ -596,7 +587,7 @@ public func HG_Ellipsize(text: String, maxChars: Int32) -> String {
 }
 
 // 1px-style outline made of four edges; returned canvas is named by the caller.
-public func HG_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickness: Float, opacity: Float) -> ref<inkCanvas> {
+public func CCUI_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickness: Float, opacity: Float) -> ref<inkCanvas> {
     let frame = new inkCanvas();
     frame.SetAnchor(inkEAnchor.Fill);
     frame.SetTintColor(color);
@@ -627,23 +618,23 @@ public func HG_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickne
 }
 
 // Palette from base\gameplay\gui\common\main_colors.inkstyle (MainColors.*).
-public func HG_Red() -> HDRColor = HDRColor(1.176, 0.381, 0.348, 1.0)
-public func HG_ActiveRed() -> HDRColor = HDRColor(1.370, 0.444, 0.405, 1.0)
-public func HG_MildRed() -> HDRColor = HDRColor(0.682, 0.231, 0.212, 1.0)
-public func HG_DarkRed() -> HDRColor = HDRColor(0.263, 0.086, 0.094, 1.0)
-public func HG_HoverRed() -> HDRColor = HDRColor(0.412, 0.086, 0.090, 1.0)  // Fullscreen_SecondaryBackground4
-public func HG_PanelBg() -> HDRColor = HDRColor(0.055, 0.035, 0.050, 1.0)   // near Fullscreen_PrimaryBackgroundDarkest, red-shifted
-public func HG_Blue() -> HDRColor = HDRColor(0.369, 0.965, 1.0, 1.0)
-public func HG_MildBlue() -> HDRColor = HDRColor(0.204, 0.569, 0.592, 1.0)
-public func HG_FaintBlue() -> HDRColor = HDRColor(0.090, 0.173, 0.180, 1.0)
-public func HG_Gold() -> HDRColor = HDRColor(1.119, 0.844, 0.257, 1.0)
-public func HG_Black() -> HDRColor = HDRColor(0.0, 0.0, 0.0, 1.0)
+public func CCUI_Red() -> HDRColor = HDRColor(1.176, 0.381, 0.348, 1.0)
+public func CCUI_ActiveRed() -> HDRColor = HDRColor(1.370, 0.444, 0.405, 1.0)
+public func CCUI_MildRed() -> HDRColor = HDRColor(0.682, 0.231, 0.212, 1.0)
+public func CCUI_DarkRed() -> HDRColor = HDRColor(0.263, 0.086, 0.094, 1.0)
+public func CCUI_HoverRed() -> HDRColor = HDRColor(0.412, 0.086, 0.090, 1.0)  // Fullscreen_SecondaryBackground4
+public func CCUI_PanelBg() -> HDRColor = HDRColor(0.055, 0.035, 0.050, 1.0)   // near Fullscreen_PrimaryBackgroundDarkest, red-shifted
+public func CCUI_Blue() -> HDRColor = HDRColor(0.369, 0.965, 1.0, 1.0)
+public func CCUI_MildBlue() -> HDRColor = HDRColor(0.204, 0.569, 0.592, 1.0)
+public func CCUI_FaintBlue() -> HDRColor = HDRColor(0.090, 0.173, 0.180, 1.0)
+public func CCUI_Gold() -> HDRColor = HDRColor(1.119, 0.844, 0.257, 1.0)
+public func CCUI_Black() -> HDRColor = HDRColor(0.0, 0.0, 0.0, 1.0)
 
-public func HG_Color(r: Float, g: Float, b: Float) -> HDRColor {
+public func CCUI_Color(r: Float, g: Float, b: Float) -> HDRColor {
     return HDRColor(r, g, b, 1.0);
 }
 
-public func HG_MakeText(text: String, size: Int32, style: CName, color: HDRColor) -> ref<inkText> {
+public func CCUI_MakeText(text: String, size: Int32, style: CName, color: HDRColor) -> ref<inkText> {
     let t = new inkText();
     t.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
     t.SetFontStyle(style);
