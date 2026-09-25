@@ -1,4 +1,4 @@
-// Minimize rarely-changed rows (voice tone, teeth, ...) to a one-line strip.
+// Minimize rarely-changed rows (voice tone, teeth, ...) to a bare one-line name/value line.
 // Works on every row the appearance menu builds: 'Selector' rows, 'ColorPicker' rows and
 // the voice tone 'VoiceOverSwitcher'. All three share the same layout: a 'TextHolder'
 // with the name/value, plus frame, arrows and hit areas around it.
@@ -44,14 +44,14 @@ public class OptionRowCollapser extends IScriptable {
     private let m_collapsed: Bool;
 
     private let m_origHeight: Float;
+    private let m_origTextHeight: Float;
     private let m_origTextMargin: inkMargin;
     private let m_saved: array<CCUI_SavedChild>;
 
-    private let m_strip: wref<inkCanvas>;
     private let m_toggle: wref<inkCanvas>;
     private let m_plusBar: wref<inkWidget>;
 
-    // Collapsed height: the name/value strip plus a small gap to the next row.
+    // Collapsed height: just the name/value line, no frame or padding.
     private let m_collapsedHeight: Float;
 
     public static func Attach(row: wref<inkWidget>, key: CName) -> ref<OptionRowCollapser> {
@@ -65,8 +65,9 @@ public class OptionRowCollapser extends IScriptable {
         self.m_text = text;
         self.m_key = key;
         self.m_origHeight = root.GetHeight();
+        self.m_origTextHeight = text.GetHeight();
         self.m_origTextMargin = text.GetMargin();
-        self.m_collapsedHeight = 104.0;
+        self.m_collapsedHeight = 60.0;
         self.Build();
         let store = RowLayoutStore.Get();
         self.Apply(IsDefined(store) && store.IsMinimized(key));
@@ -78,23 +79,8 @@ public class OptionRowCollapser extends IScriptable {
         let label = (this.m_text as inkCompoundWidget).GetWidget(n"OptionsLabel");
         if IsDefined(label) {
             let m = label.GetMargin();
-            label.SetMargin(inkMargin(m.left + 26.0, m.top, m.right, m.bottom));
+            label.SetMargin(inkMargin(m.left + 50.0, m.top, m.right, m.bottom));
         }
-
-        // Compact frame drawn behind the name/value while collapsed.
-        let strip = new inkCanvas();
-        strip.SetName(n"ccuiStrip");
-        strip.SetAnchor(inkEAnchor.TopLeft);
-        strip.SetMargin(inkMargin(22.0, 5.0, 0.0, 0.0));
-        strip.SetSize(Vector2(this.m_root.GetWidth() - 22.0, 90.0));
-        let bg = new inkRectangle();
-        bg.SetAnchor(inkEAnchor.Fill);
-        bg.SetTintColor(CCUI_DarkRed());
-        bg.SetOpacity(0.55);
-        bg.Reparent(strip);
-        CCUI_AddFrame(strip, CCUI_MildRed(), 2.0, 0.8);
-        strip.SetVisible(false);
-        strip.Reparent(this.m_root, 0);
 
         // [–] / [+] toggle: a framed box with a horizontal bar, plus a vertical bar when collapsed.
         let toggle = new inkCanvas();
@@ -124,13 +110,12 @@ public class OptionRowCollapser extends IScriptable {
         toggle.RegisterToCallback(n"OnHoverOut", this, n"OnToggleHoverOut");
         toggle.Reparent(this.m_root);
 
-        this.m_strip = strip;
         this.m_toggle = toggle;
         this.m_plusBar = plus;
     }
 
     private func IsOwnWidget(w: wref<inkWidget>) -> Bool {
-        return w == this.m_text || w == this.m_strip || w == this.m_toggle;
+        return w == this.m_text || w == this.m_toggle;
     }
 
     public func Apply(collapsed: Bool) {
@@ -149,6 +134,7 @@ public class OptionRowCollapser extends IScriptable {
                 i += 1;
             }
             this.m_root.SetHeight(this.m_collapsedHeight);
+            this.m_text.SetHeight(this.m_collapsedHeight);
             this.m_text.SetMargin(inkMargin(0.0, 0.0, 0.0, 0.0));
         } else {
             for saved in this.m_saved {
@@ -159,9 +145,9 @@ public class OptionRowCollapser extends IScriptable {
             }
             ArrayClear(this.m_saved);
             this.m_root.SetHeight(this.m_origHeight);
+            this.m_text.SetHeight(this.m_origTextHeight);
             this.m_text.SetMargin(this.m_origTextMargin);
         }
-        this.m_strip.SetVisible(collapsed);
         this.m_plusBar.SetVisible(collapsed);
 
         // Vertically center the toggle on the name line. TextHolder is anchored
@@ -169,7 +155,7 @@ public class OptionRowCollapser extends IScriptable {
         let h = this.m_root.GetHeight();
         let m = this.m_text.GetMargin();
         let centerY = (h + m.top - m.bottom) / 2.0;
-        this.m_toggle.SetMargin(inkMargin(40.0, centerY - 18.0, 0.0, 0.0));
+        this.m_toggle.SetMargin(inkMargin(30.0, centerY - 18.0, 0.0, 0.0));
     }
 
     protected cb func OnToggleRelease(e: ref<inkPointerEvent>) -> Bool {

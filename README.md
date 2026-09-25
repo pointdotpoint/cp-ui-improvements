@@ -30,7 +30,7 @@ The rows are listed in `CCUI_IsGridSlot` in `GridTargets.reds`:
   - Favorites are listed first, gold-starred, and counted per category in the header.
   - They're keyed as `<uiSlot>:<internal name>`, so they survive mods being added or removed, and they're shared across all saves (Codeware persistent storage).
   - Clicking the star doesn't apply the entry. A short notice ("Added to favorites: …" / "Removed from favorites: …") appears above the buttons and fades out.
-- **Minimize rows:** every row (including voice tone) gets a small `[–]` left of its name. Minimizing collapses the row to a one-line strip with its name and value; `[+]` expands it again. The collapsed row's arrows and buttons are disabled, so it can't be changed by accident. Minimized rows are remembered across sessions and saves, keyed by the option's internal name (`voice_tone` for the voice switcher). Color-swatch rows show only their name while minimized.
+- **Minimize rows:** every row (including voice tone) gets a small `[–]` left of its name. Minimizing collapses the row to a single bare line with its name and value (no frame); `[+]` expands it again. The collapsed row's arrows and buttons are disabled, so it can't be changed by accident. Minimized rows are remembered across sessions and saves, keyed by the option's internal name (`voice_tone` for the voice switcher). Color-swatch rows show only their name while minimized.
 - **Paging:** with one or two pages, `< PREV` / `NEXT >` (wrapping around). With more than two pages the footer becomes `FIRST` `<<` `>>` `LAST`. **CLOSE**, or Esc, closes the grid.
 - While a grid is open, confirm and randomize inputs are blocked so a stray click can't finish character creation.
 - The vanilla ◁ ▷ arrows keep working.
