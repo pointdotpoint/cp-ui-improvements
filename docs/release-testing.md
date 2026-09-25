@@ -10,7 +10,7 @@ Status key: **done** = observed working in the logs or reported during developme
 |---|---|---|---|
 | 1 | Startup: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready` in `gamelog.log`, no redscript error popup | done | 2026-09-25 13:53:19: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready`, no error popup. |
 | 2 | Pick an entry from a grid, then CONFIRM: finalizes normally | done | Hair: 13:01 apply then "refinalize complete". Other rows reported working by the user ("it all works well"). |
-| 3 | Favorites: star toggles, favorites sort first, notice fades, header count is per category | done | Nose and cyberware favorites stored per category (`nose:h042`, `cyberware_switcher:cyberware_07`); reported working. |
+| 3 | Favorites: star toggles, favorites sort first, notice fades, header count is per category | re-check | Worked with a star on every tile. Now only favorites show a (gold) star, and clicking it unfavorites. Check that non-favorite tiles have no star and use the full width for the name. |
 | 4 | Favorites persist after a full quit and relaunch | done | Keys present in Codeware's `ScriptableServiceContainer.dat` after a clean exit (14:00:10) and reported working after relaunch. Old Hair Grid favorites were lost to the pre-release rename (not a user-facing issue). |
 | 5 | New Game creator, real apartment mirror, ripperdoc, Character Customization Anywhere | done | Reported working by the user ("it all works"). |
 | 6 | Male V | done | Reported working by the user ("it all works"). |

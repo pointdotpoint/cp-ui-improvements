@@ -302,7 +302,7 @@ public class OptionGridOverlay extends inkCustomController {
     private func MakeTile(index: Int32) -> ref<inkCanvas> {
         let info = this.GetInfo();
         let textW = this.m_tileW - 40.0;
-        let labelW = textW - 44.0; // room for the star
+        let labelW = textW; // narrowed for the star in RestyleTiles when the entry is a favorite
 
         let tile = new inkCanvas();
         tile.SetName(StringToName(s"grid_tile_\(index)"));
@@ -347,7 +347,7 @@ public class OptionGridOverlay extends inkCustomController {
         sub.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
         sub.Reparent(tile);
 
-        // Favorite toggle; its clicks are kept from applying the entry (see OnTileRelease).
+        // Gold star, shown only on favorites; clicking it unfavorites without applying (see OnTileRelease).
         let star = new inkImage();
         star.SetName(n"star");
         star.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
@@ -382,14 +382,18 @@ public class OptionGridOverlay extends inkCustomController {
             let bar = tile.GetWidget(n"bar");
             let label = tile.GetWidget(n"label");
             let sub = tile.GetWidget(n"sub");
+            // Only favorites show a star (clicking it unfavorites); others get the full width for the name.
             let star = tile.GetWidget(n"star");
-            if this.IsFavorite(index) {
+            let fav = this.IsFavorite(index);
+            star.SetVisible(fav);
+            star.SetInteractive(fav);
+            if fav {
                 star.SetTintColor(CCUI_Gold());
                 star.SetOpacity(1.0);
-            } else {
-                star.SetTintColor(hovered ? CCUI_Red() : CCUI_MildRed());
-                star.SetOpacity(hovered ? 0.9 : 0.45);
             }
+            let labelW = this.m_tileW - (fav ? 84.0 : 40.0);
+            label.SetSize(Vector2(labelW, 72.0));
+            (label as inkText).SetWrapping(true, labelW);
 
             if selected {
                 bg.SetTintColor(CCUI_FaintBlue());
@@ -555,12 +559,9 @@ public class OptionGridOverlay extends inkCustomController {
         return true;
     }
 
+    // Only favorites have a visible star; dim it on hover to hint that a click removes it.
     protected cb func OnStarHoverOver(e: ref<inkPointerEvent>) -> Bool {
-        let star = e.GetCurrentTarget();
-        if !this.IsFavorite(CCUI_TileIndex(star.GetParentWidget())) {
-            star.SetTintColor(CCUI_Gold());
-            star.SetOpacity(0.8);
-        }
+        e.GetCurrentTarget().SetOpacity(0.6);
         return false;
     }
 

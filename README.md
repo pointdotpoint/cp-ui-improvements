@@ -26,11 +26,10 @@ The rows are listed in `CCUI_IsGridSlot` in `GridTargets.reds`:
   - Each tile shows the display name, the index and the internal name, so modded entries that share a display name can be told apart.
   - It opens on the page with the current entry, which is highlighted in cyan.
   - Clicking a tile applies it right away, and the grid stays open so you can try several in a row.
-- **Favorites:** click the star in a tile's top-right corner to favorite or unfavorite it.
-  - Favorites are listed first, gold-starred, and counted per category in the header.
+- **Favorites:** the star button in the footer, before CLOSE, favorites or unfavorites the entry currently applied. It's gold when that entry is a favorite.
+  - Favorites are listed first, with a gold star in the tile's corner, and counted per category in the header. Tiles that aren't favorites show no star. Clicking a tile's gold star unfavorites it without applying it.
   - They're keyed as `<uiSlot>:<internal name>`, so they survive mods being added or removed, and they're shared across all saves (Codeware persistent storage).
-  - A star button in the footer, before CLOSE, favorites or unfavorites the entry currently applied. It's gold when that entry is a favorite.
-  - Clicking the star doesn't apply the entry. A short notice ("Added to favorites: …" / "Removed from favorites: …") appears above the buttons and fades out.
+  - A short notice ("Added to favorites: …" / "Removed from favorites: …") appears above the buttons and fades out.
 - **Minimize rows:** every row (including voice tone) gets a small `[–]` left of its name. Minimizing collapses the row to a single bare line with its name and value (no frame); `[+]` expands it again. The collapsed row's arrows and buttons are disabled, so it can't be changed by accident. Minimized rows are remembered across sessions and saves, keyed by the option's internal name (`voice_tone` for the voice switcher). Color-swatch rows show only their name while minimized.
 - **Paging:** with one or two pages, `< PREV` / `NEXT >` (wrapping around). With more than two pages the footer becomes `FIRST` `‹` `›` `LAST` (drawn chevrons; the game font has no ‹ › glyphs). **CLOSE**, or Esc, closes the grid.
 - While a grid is open, confirm and randomize inputs are blocked so a stray click can't finish character creation.
