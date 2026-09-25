@@ -137,13 +137,15 @@ public class OptionGridOverlay extends inkCustomController {
         footer.SetMargin(inkMargin(0.0, 16.0, 0.0, 0.0));
         footer.Reparent(content);
 
-        // With more than two pages: FIRST << >> LAST; otherwise < PREV / NEXT > (see UpdatePaging).
+        // With more than two pages: FIRST ‹ › LAST; otherwise < PREV / NEXT > (see UpdatePaging).
         let firstBtn = this.MakeButton("FIRST", n"OnFirstRelease", 190.0);
         firstBtn.SetAffectsLayoutWhenHidden(false);
         firstBtn.Reparent(footer);
         let prevBtn = this.MakeButton("< PREV", n"OnPrevRelease", 200.0);
+        CCUI_AddChevron(prevBtn, true);
         prevBtn.Reparent(footer);
         let nextBtn = this.MakeButton("NEXT >", n"OnNextRelease", 200.0);
+        CCUI_AddChevron(nextBtn, false);
         nextBtn.Reparent(footer);
         let lastBtn = this.MakeButton("LAST", n"OnLastRelease", 190.0);
         lastBtn.SetAffectsLayoutWhenHidden(false);
@@ -439,8 +441,11 @@ public class OptionGridOverlay extends inkCustomController {
         let many = this.PageCount() > 2;
         this.m_firstBtn.SetVisible(many);
         this.m_lastBtn.SetVisible(many);
-        (this.m_prevBtn.GetWidget(n"label") as inkText).SetText(many ? "<<" : "< PREV");
-        (this.m_nextBtn.GetWidget(n"label") as inkText).SetText(many ? ">>" : "NEXT >");
+        // The UI font has no ‹ › glyphs, so the compact buttons show drawn chevrons instead.
+        for btn in [this.m_prevBtn, this.m_nextBtn] {
+            btn.GetWidget(n"label").SetVisible(!many);
+            btn.GetWidget(n"chevron").SetVisible(many);
+        }
     }
 
     private func MakeButton(text: String, callback: CName, width: Float) -> ref<inkCanvas> {
@@ -545,6 +550,10 @@ public class OptionGridOverlay extends inkCustomController {
         btn.GetWidget(n"bg").SetTintColor(CCUI_HoverRed());
         btn.GetWidget(n"frame").SetOpacity(1.0);
         btn.GetWidget(n"label").SetTintColor(CCUI_ActiveRed());
+        let chevron = btn.GetWidget(n"chevron");
+        if IsDefined(chevron) {
+            chevron.SetTintColor(CCUI_ActiveRed());
+        }
         return false;
     }
 
@@ -553,6 +562,10 @@ public class OptionGridOverlay extends inkCustomController {
         btn.GetWidget(n"bg").SetTintColor(CCUI_DarkRed());
         btn.GetWidget(n"frame").SetOpacity(0.8);
         btn.GetWidget(n"label").SetTintColor(CCUI_Red());
+        let chevron = btn.GetWidget(n"chevron");
+        if IsDefined(chevron) {
+            chevron.SetTintColor(CCUI_Red());
+        }
         return false;
     }
 
@@ -623,6 +636,48 @@ public func CCUI_TileIndex(widget: wref<inkWidget>) -> Int32 {
         return -1;
     }
     return StringToInt(StrAfterFirst(name, "grid_tile_"), -1);
+}
+
+// A single chevron (‹ or ›) drawn as two rotated bars, named "chevron", hidden until UpdatePaging shows it.
+public func CCUI_AddChevron(parent: ref<inkCompoundWidget>, pointLeft: Bool) {
+    let w = 30.0;
+    let h = 40.0;
+    let reach = 13.0;      // horizontal distance from the tip to the arm ends
+    let thickness = 4.0;
+    let armLength = reach * 1.4142 + thickness / 2.0;
+
+    let chevron = new inkCanvas();
+    chevron.SetName(n"chevron");
+    chevron.SetAnchor(inkEAnchor.Centered);
+    chevron.SetAnchorPoint(Vector2(0.5, 0.5));
+    chevron.SetSize(Vector2(w, h));
+    chevron.SetTintColor(CCUI_Red());
+    chevron.SetVisible(false);
+
+    let tipX = pointLeft ? (w - reach) / 2.0 : (w + reach) / 2.0;
+    let armX = pointLeft ? tipX + reach / 2.0 : tipX - reach / 2.0;
+    let midY = h / 2.0;
+    // Screen y grows downward and positive rotation is clockwise, so for ‹ the upper arm
+    // ("/") is rotated -45° and the lower arm ("\") +45°; › mirrors that.
+    let upperAngle = pointLeft ? -45.0 : 45.0;
+
+    let upper = new inkRectangle();
+    upper.SetAnchor(inkEAnchor.TopLeft);
+    upper.SetAnchorPoint(Vector2(0.5, 0.5));
+    upper.SetSize(Vector2(armLength, thickness));
+    upper.SetMargin(inkMargin(armX, midY - reach / 2.0, 0.0, 0.0));
+    upper.SetRotation(upperAngle);
+    upper.Reparent(chevron);
+
+    let lower = new inkRectangle();
+    lower.SetAnchor(inkEAnchor.TopLeft);
+    lower.SetAnchorPoint(Vector2(0.5, 0.5));
+    lower.SetSize(Vector2(armLength, thickness));
+    lower.SetMargin(inkMargin(armX, midY + reach / 2.0, 0.0, 0.0));
+    lower.SetRotation(-upperAngle);
+    lower.Reparent(chevron);
+
+    chevron.Reparent(parent);
 }
 
 // Hard cap as a backstop in case the engine's overflow policy doesn't clip.

@@ -17,7 +17,7 @@ Status key: **done** = observed working in the logs or reported during developme
 | 7 | Esc closes the grid; Enter/F don't confirm while it's open | done | Reported working by the user ("it all works"). |
 | 8 | Gamepad: nothing breaks, arrows still work | done | Reported working by the user ("it all works"). |
 | 9 | Tile text: long names end with "…" inside the tile, no overlap | done | Reported working by the user ("it all works"). |
-| 9b | Paging: one or two pages shows `< PREV` / `NEXT >` only; more than two shows `FIRST` `<<` `>>` `LAST`, and FIRST/LAST jump to the ends | done | Reported working by the user ("it all works"). |
+| 9b | Paging: one or two pages shows `< PREV` / `NEXT >` only; more than two shows `FIRST` `‹` `›` `LAST`, and FIRST/LAST jump to the ends | re-check | Paging worked with `<<` `>>` text; now drawn ‹ › chevrons. Check they point the right way (‹ = previous) and highlight on hover. |
 | 9c | Minimize: `[–]` on voice tone and on a normal row collapses it to a bare line (no frame) with name and value; `[+]` restores it. The collapsed row's arrows don't respond. The state survives reopening the menu and a restart. The list scrolls correctly with rows collapsed. Mirrors with Appearance Change Unlocker, which removes the voice row, still work | done | Reported working by the user ("it all works"). |
 | 10 | Rows *without* a grid (skin tone, hair color, eyes, eyebrows, …) look and behave vanilla | done | Reported working by the user ("it all works"). |
 | 11 | Uninstall: delete the folder; the game starts and the creator is vanilla | done | Removed with `scripts/deploy.sh --uninstall`; the game started and the creator was vanilla (user, 2026-09-25). Reinstalled afterwards. |

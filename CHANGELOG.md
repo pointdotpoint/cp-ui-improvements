@@ -10,7 +10,7 @@ First release. Developed as "Hair Grid", which was never published.
 - Favorites: a star toggle on each tile pins that entry to the front of its category.
   - Stored by internal name per category and shared across saves (Codeware persistent service).
   - A fading notice confirms each add or remove.
-- Paging: `< PREV` / `NEXT >`, plus `FIRST` / `LAST` (with `<<` / `>>`) when a row has more than two pages.
+- Paging: `< PREV` / `NEXT >`, plus `FIRST` / `LAST` (with `‹` / `›`) when a row has more than two pages.
 - Minimize: a `[–]`/`[+]` toggle on every row, voice tone included, collapses rarely-changed rows to a single bare line. The choice is remembered across saves.
 - Styled with the game's MainColors palette; long names are clipped to the tile.
 - While a grid is open, Esc closes it, and confirm/randomize input is blocked.
