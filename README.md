@@ -7,7 +7,7 @@ Cyberpunk 2077 UI tweaks. First one: **Hair Grid**. It adds a paged, clickable g
 - The **HAIRSTYLE** row gets the same `< ▦ >` layout as Skin Tone / Hair Color. The middle ▦ button opens the grid. It works in New Game and in edit mode (mirror/ripperdoc).
 - The grid opens on the right, over the option list, so the model stays visible. It shows 30 styles per page (3×10). Each tile shows its index, the display name and the internal option name, so CCXL hairs that share a display name can be told apart.
 - The current style is highlighted. Clicking a tile applies it right away, and the grid stays open so you can try several styles in a row.
-- **Favorites:** click the star in a tile's top-right corner to favorite or unfavorite it. Favorites are listed first, gold-starred. They're keyed by the internal hair name, so they survive hair mods being added or removed, and they're shared across all saves (Codeware persistent storage). Clicking the star doesn't apply the hair.
+- **Favorites:** click the star in a tile's top-right corner to favorite or unfavorite it. Favorites are listed first, gold-starred. They're keyed by the internal hair name, so they survive hair mods being added or removed, and they're shared across all saves (Codeware persistent storage). Clicking the star doesn't apply the hair. A short notice ("Added to favorites: …" / "Removed from favorites: …") appears above the buttons and fades out.
 - **PREV/NEXT** change page. **CLOSE**, or the game's back key (Esc), closes the grid.
 - While the grid is open, confirm and randomize inputs are blocked so a stray click can't finish character creation.
 - The vanilla left/right switcher is untouched.

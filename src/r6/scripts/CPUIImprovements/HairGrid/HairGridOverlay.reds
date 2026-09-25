@@ -15,6 +15,9 @@ public class HairGridOverlay extends inkCustomController {
 
     private let m_grid: wref<inkVerticalPanel>;
     private let m_info: wref<inkText>;
+    private let m_toast: wref<inkHorizontalPanel>;
+    private let m_toastIcon: wref<inkImage>;
+    private let m_toastText: wref<inkText>;
     private let m_tiles: array<wref<inkCanvas>>;
     // Display order: favorites first (in list order), then the rest.
     private let m_order: array<Int32>;
@@ -58,8 +61,8 @@ public class HairGridOverlay extends inkCustomController {
         let contentW = Cast<Float>(this.m_cols) * this.m_tileW + Cast<Float>(this.m_cols - 1) * this.m_gap;
         let gridH = Cast<Float>(this.m_rows) * (this.m_tileH + this.m_gap);
         let panelW = contentW + 80.0;
-        // Header (~110) + grid + footer (~110) + padding (72).
-        let panelH = 110.0 + gridH + 110.0 + 72.0;
+        // Header (~110) + grid + toast line (~60) + footer (~110) + padding (72).
+        let panelH = 110.0 + gridH + 60.0 + 110.0 + 72.0;
 
         // Right side, over the option list, below "CUSTOMIZE YOUR LOOK" and above BACK/CONFIRM.
         let panel = new inkCanvas();
@@ -108,6 +111,26 @@ public class HairGridOverlay extends inkCustomController {
         grid.SetSize(new Vector2(contentW, gridH));
         grid.Reparent(content);
 
+        // Toast line: favorite added/removed, fades out on its own.
+        let toast = new inkHorizontalPanel();
+        toast.SetName(n"toast");
+        toast.SetSize(new Vector2(contentW, 48.0));
+        toast.SetMargin(new inkMargin(0.0, 6.0, 0.0, 6.0));
+        toast.SetOpacity(0.0);
+        toast.Reparent(content);
+
+        let toastIcon = new inkImage();
+        toastIcon.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
+        toastIcon.SetTexturePart(n"icon_star");
+        toastIcon.SetSize(new Vector2(36.0, 36.0));
+        toastIcon.SetVAlign(inkEVerticalAlign.Center);
+        toastIcon.SetMargin(new inkMargin(0.0, 0.0, 14.0, 0.0));
+        toastIcon.Reparent(toast);
+
+        let toastText = HG_MakeText("", 32, n"Medium", HG_Gold());
+        toastText.SetVAlign(inkEVerticalAlign.Center);
+        toastText.Reparent(toast);
+
         // Footer: paging + close
         let footer = new inkHorizontalPanel();
         footer.SetMargin(new inkMargin(0.0, 16.0, 0.0, 0.0));
@@ -119,6 +142,9 @@ public class HairGridOverlay extends inkCustomController {
 
         this.m_grid = grid;
         this.m_info = info;
+        this.m_toast = toast;
+        this.m_toastIcon = toastIcon;
+        this.m_toastText = toastText;
 
         this.SetRootWidget(root);
     }
@@ -136,6 +162,8 @@ public class HairGridOverlay extends inkCustomController {
         if count <= 0 {
             return;
         }
+        this.m_toast.StopAllAnimations();
+        this.m_toast.SetOpacity(0.0);
         this.BuildOrder();
         this.m_page = Max(0, this.DisplayPos(this.GetCurrent())) / this.PageSize();
         this.Rebuild();
@@ -377,6 +405,26 @@ public class HairGridOverlay extends inkCustomController {
         }
     }
 
+    private func ShowToast(added: Bool, name: String) {
+        let color = added ? HG_Gold() : HG_MildRed();
+        this.m_toastIcon.SetTintColor(color);
+        this.m_toastIcon.SetOpacity(added ? 1.0 : 0.5);
+        this.m_toastText.SetTintColor(color);
+        this.m_toastText.SetText(HG_Ellipsize((added ? "Added to favorites: " : "Removed from favorites: ") + name, 70));
+
+        // Restart: visible now, hold, then fade out.
+        this.m_toast.StopAllAnimations();
+        this.m_toast.SetOpacity(1.0);
+        let fade = new inkAnimTransparency();
+        fade.SetStartTransparency(1.0);
+        fade.SetEndTransparency(0.0);
+        fade.SetStartDelay(1.8);
+        fade.SetDuration(0.6);
+        let anim = new inkAnimDef();
+        anim.AddInterpolator(fade);
+        this.m_toast.PlayAnimation(anim);
+    }
+
     private func UpdateInfo() {
         let favs = HairFavorites.Get();
         let favCount = IsDefined(favs) ? favs.Count() : 0;
@@ -437,6 +485,7 @@ public class HairGridOverlay extends inkCustomController {
             if index >= 0 && IsDefined(info) && IsDefined(favs) {
                 let now = favs.Toggle(HG_HairKey(info.options[index]));
                 HG_Log(s"favorite #\(index) -> \(now) (\(favs.Count()) total)");
+                this.ShowToast(now, this.GetLabel(info.options[index]));
                 if IsDefined(this.m_menu) {
                     this.m_menu.PlaySound(n"Button", n"OnPress");
                 }
