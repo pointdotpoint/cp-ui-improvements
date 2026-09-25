@@ -29,14 +29,14 @@ public func HG_EnableGallery(menu: ref<characterCreationBodyMorphMenu>) {
     }
     let arrows = root.GetWidget(n"arrows");
     if IsDefined(arrows) {
-        arrows.SetMargin(new inkMargin(0.0, 0.0, 0.0, 15.0));
+        arrows.SetMargin(inkMargin(0.0, 0.0, 0.0, 15.0));
     }
 
     let btn = new inkCanvas();
     btn.SetName(n"hgGridButton");
     btn.SetAnchor(inkEAnchor.BottomCenter);
-    btn.SetAnchorPoint(new Vector2(0.5, 1.0));
-    btn.SetSize(new Vector2(290.0, 72.0));
+    btn.SetAnchorPoint(Vector2(0.5, 1.0));
+    btn.SetSize(Vector2(290.0, 72.0));
     btn.SetInteractive(true);
 
     // Near-invisible fill so the area is hit-testable; the grid glyph comes from the arrows texture.

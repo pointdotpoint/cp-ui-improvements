@@ -7,6 +7,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+source "$ROOT/scripts/lib.sh"
 GAME="${CP2077_DIR:-$HOME/.local/share/Steam/steamapps/common/Cyberpunk 2077}"
 CLI="$ROOT/.tools/redscript-src/target/release/redscript-cli"
 SRC="$ROOT/src/r6/scripts/CPUIImprovements"
@@ -30,25 +31,29 @@ trap 'rm -rf "$OUT"' EXIT
 
 args=(-s "$SRC" -s "$GAME/red4ext/plugins/Codeware/Scripts")
 if [[ "${1:-}" == "--full" ]]; then
-    args=(-s "$GAME/r6/scripts")
+    # Every installed mod except the deployed copy of ours; ours comes from the source tree.
+    args=(-s "$SRC")
+    for entry in "$GAME"/r6/scripts/*; do
+        [[ "$(basename "$entry")" == "CPUIImprovements" ]] && continue
+        [[ -d "$entry" || "$entry" == *.reds ]] && args+=(-s "$entry")
+    done
     for d in "$GAME"/red4ext/plugins/*/Scripts; do args+=(-s "$d"); done
-    # Include ours from the source tree, not a possibly stale deployed copy.
-    if [[ -d "$GAME/r6/scripts/CPUIImprovements" ]]; then
-        echo "note: --full compiles the deployed copy in r6/scripts; run deploy.sh first" >&2
-    else
-        args+=(-s "$SRC")
-    fi
 fi
 
 if [[ "${1:-}" != "--full" ]]; then
-    "$CLI" compile "${args[@]}" -b "$GAME/r6/cache/final.redscripts" -o "$OUT/final.redscripts"
-    exit
+    if rs_compile "$CLI" "$OUT/log" "${args[@]}" -b "$GAME/r6/cache/final.redscripts" -o "$OUT/final.redscripts"; then
+        grep -E "WARN|ERROR" "$OUT/log" || true
+        echo "compile OK"
+        exit 0
+    fi
+    cat "$OUT/log"
+    echo "compile FAILED" >&2
+    exit 1
 fi
 
 # Some installed mods fail offline (the game resolves extra script paths at launch),
 # so only report diagnostics that point at our files.
-"$CLI" compile "${args[@]}" -b "$GAME/r6/cache/final.redscripts" -o "$OUT/final.redscripts" \
-    > "$OUT/log" 2>&1 || true
+rs_compile "$CLI" "$OUT/log" "${args[@]}" -b "$GAME/r6/cache/final.redscripts" -o "$OUT/final.redscripts" || true
 ours="$(grep -A4 -E "(ERROR|WARN).*CPUIImprovements" "$OUT/log" || true)"
 others="$(grep -E "ERROR.*At " "$OUT/log" | grep -vc CPUIImprovements || true)"
 if [[ -n "$ours" ]]; then

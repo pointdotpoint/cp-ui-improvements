@@ -72,7 +72,7 @@ private func HG_EnsureUI() {
     // Added to the menu root last so it draws above the option list.
     this.m_hgOverlay = HairGridOverlay.Create(this);
     this.m_hgOverlay.Reparent(this.GetRootCompoundWidget(), this);
-    HG_Log("UI created");
+    HG_Info(s"Hair Grid \(HG_Version()) ready");
 }
 
 @addMethod(characterCreationBodyMorphMenu)
@@ -119,31 +119,12 @@ public func HG_Apply(index: Int32) {
     this.PlaySound(n"Button", n"OnPress");
 }
 
-// ---- diagnostics for the confirm flow ----
-
+// Close the grid before the game finalizes the character.
 @wrapMethod(characterCreationBodyMorphMenu)
 public final func ConfirmCustomizedCharacter() -> Void {
     HG_Log(s"confirm (finalized=\(this.m_updatingFinalizedState), busy=\(EnumInt(this.m_busySwitchingAppearance)), gridOpen=\(this.HG_IsOpen()))");
     this.HG_Close();
     wrappedMethod();
-}
-
-@wrapMethod(characterCreationBodyMorphMenu)
-protected cb func OnAppearanceAppliedEvent(evt: ref<gameuiCharacterCustomizationSystem_OnAppearanceAppliedEvent>) -> Bool {
-    HG_Log(s"appearance applied (busy=\(EnumInt(this.m_busySwitchingAppearance)))");
-    return wrappedMethod(evt);
-}
-
-@wrapMethod(characterCreationBodyMorphMenu)
-protected cb func OnReFinalizeComplete(evt: ref<gameuiCharacterCustomizationSystem_OnReFinalizeStateCompleteEvent>) -> Bool {
-    HG_Log("refinalize complete");
-    return wrappedMethod(evt);
-}
-
-@wrapMethod(characterCreationBodyMorphMenu)
-protected cb func OnCancelFinalizedStateUpdate(evt: ref<gameuiCharacterCustomizationSystem_OnCancelFinalizedStateUpdateEvent>) -> Bool {
-    HG_Log("refinalize cancelled");
-    return wrappedMethod(evt);
 }
 
 @addMethod(characterCreationBodyMorphMenu)

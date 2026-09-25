@@ -23,6 +23,22 @@ scripts/deploy.sh --uninstall
 ```
 Set `CP2077_DIR` if the game isn't at `~/.local/share/Steam/steamapps/common/Cyberpunk 2077`.
 
+### Release
+```sh
+scripts/release-check.sh   # every offline check below, then builds the package; exits non-zero on any FAIL
+scripts/package.sh         # just build + verify dist/HairGrid-<version>.zip
+```
+`release-check.sh` runs, in order:
+0. **Tooling sanity:** a deliberately broken script must be reported as failing. redscript-cli 0.5.31 exits 0 even on failed builds, so `scripts/lib.sh` judges success by the compiler's output.
+1. **Lint** with redscript 0.5.31.
+2. **Compile** against the vanilla bundle plus Codeware.
+3. **Compile** with every mod installed in the game folder. Only diagnostics in our files count.
+4. **Compile** with the redscript 1.0 preview. Our files must be clean; Codeware 1.19 itself has errors under 1.0.
+5. **Nexus compatibility:** mods in [rfuzzo/cyberpunk-nexus-script-dump](https://github.com/rfuzzo/cyberpunk-nexus-script-dump) that annotate the same classes. The check looks for conflicting `@replaceMethod`/`@addMethod`/`@addField` on what we touch, then compiles each of those mods next to ours. Mods that don't compile on the current game version even without ours are reported separately.
+6. **Package:** builds the zip, checks it contains exactly `r6/scripts/CPUIImprovements/HairGrid/*.reds`, and compiles the extracted copy. It refuses to package if debug logging is on.
+
+Release docs: `CHANGELOG.md` and `docs/nexus-description.bbcode` (paste into the Nexus description, which uses BBCode). Bump the version in `HairGridInfo.reds` (`HG_Version()`).
+
 ### Compile check (offline, no game launch)
 ```sh
 scripts/check.sh          # our scripts + Codeware against the vanilla bundle
@@ -33,13 +49,14 @@ The first run builds `redscript-cli` v0.5.31 into `.tools/`. That version matche
 
 ### Code
 - `src/r6/scripts/CPUIImprovements/HairGrid/MenuHooks.reds`: hooks on `characterCreationBodyMorphMenu`:
-  - `InitializeList`, `CreateEntry`, `OnOptionUpdated`, `OnButtonRelease`
+  - `InitializeList`, `CreateEntry`, `OnOptionUpdated`, `OnButtonRelease`, `ConfirmCustomizedCharacter`
   - `HG_Apply`, which mirrors vanilla `OnSliderChange` → `ApplyChangeToOption`
 - `src/r6/scripts/CPUIImprovements/HairGrid/SelectorGallery.reds`: restyles the hairstyle `Selector` row (`characterCreationBodyMorphOption`) with the gallery art and adds the middle button.
 - `src/r6/scripts/CPUIImprovements/HairGrid/HairGridOverlay.reds`: the Codeware `inkCustomController` overlay.
+- `src/r6/scripts/CPUIImprovements/HairGrid/HairGridInfo.reds`: version constant and log switches.
 - `src/r6/scripts/CPUIImprovements/HairGrid/HairFavorites.reds`: the favorites store, a `ScriptableService` with a `persistent` `array<CName>`.
 
-Debug lines are written with Codeware `ModLog(n"HairGrid", ...)` and land in `<game>/bin/x64/plugins/cyber_engine_tweaks/gamelog.log` (flushed with a delay while the game runs).
+Logging uses Codeware `ModLog(n"HairGrid", ...)`, which writes to `<game>/bin/x64/plugins/cyber_engine_tweaks/gamelog.log` (flushed with a delay while the game runs). Release builds log one line at startup (`Hair Grid <version> ready`); set `HG_DebugLogging()` to `true` in `HairGridInfo.reds` for verbose click, apply and confirm lines.
 
 ## In-game test checklist
 1. Deploy, then launch. If redscript shows an error popup, run `scripts/check.sh --log`.

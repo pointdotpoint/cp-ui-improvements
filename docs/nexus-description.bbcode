@@ -1,0 +1,44 @@
+[size=5][b]Hair Grid[/b][/size]
+[i]Browse every hairstyle at once in the character creator, instead of clicking through them one by one.[/i]
+
+With a few hundred CCXL hairs installed, the vanilla hairstyle selector means clicking ◁ ▷ dozens of times to find the one you want. Hair Grid gives the [b]Hairstyle[/b] row the same [b]◁ ▦ ▷[/b] layout as Skin Tone and Hair Color. Click the middle button to open a paged grid of every style.
+
+[size=4][b]Features[/b][/size]
+[list]
+[*][b]Grid picker[/b]: 27 styles per page, with the vanilla UI's red look. Click a tile to apply it right away; the grid stays open so you can keep comparing.
+[*][b]Every hair[/b]: vanilla and all CCXL / ArchiveXL hair mods. Each tile shows the name plus the internal option name, so hairs that share a display name are easy to tell apart.
+[*][b]Favorites[/b]: click the star on a tile to pin it to the front of the list. Favorites are shared across all saves and are stored by hair name, so adding or removing hair mods doesn't mix them up.
+[*][b]Current hair highlighted[/b], and the grid opens on the page that contains it.
+[*]Works in the [b]New Game character creator[/b], at [b]mirrors[/b] and at [b]ripperdocs[/b].
+[*]The vanilla ◁ ▷ arrows keep working as before.
+[/list]
+
+[size=4][b]Requirements[/b][/size]
+[list]
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/1511]redscript[/url]
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/7780]Codeware[/url] 1.19.0 or newer
+[/list]
+Tested on game version 2.31 with redscript 0.5.31 and Codeware 1.19.0.
+
+[size=4][b]Installation[/b][/size]
+Install with Vortex or Mod Organizer 2, or extract the archive into your Cyberpunk 2077 folder. You should end up with:
+[code]Cyberpunk 2077/r6/scripts/CPUIImprovements/HairGrid/*.reds[/code]
+
+[size=4][b]Uninstall[/b][/size]
+Delete [font=Courier New]r6/scripts/CPUIImprovements/HairGrid[/font]. Saves don't depend on this mod: it only changes the menu, and applies hair through the same game function the arrows use.
+
+[size=4][b]Known limitations[/b][/size]
+[list]
+[*]Mouse only. The grid can't be navigated with a gamepad yet; the vanilla arrows still work on gamepad.
+[*]Tiles show names, not thumbnails.
+[*]English UI text only.
+[/list]
+
+[size=4][b]Compatibility[/b][/size]
+[list]
+[*]Hooks only the appearance menu of the character creator ([font=Courier New]characterCreationBodyMorphMenu[/font]) and its selector rows, using wrapMethod only. No replaceMethod.
+[*]Used in-game with Character Customization Anywhere and CCXL multicolored hair. Compiles together with Fresh Start. Appearance Change Unlocker hooks different methods of the same menu, so there's no overlap.
+[/list]
+
+[size=4][b]Troubleshooting[/b][/size]
+The mod writes one line on startup, [font=Courier New][HairGrid] Hair Grid 1.0.0 ready[/font], to [font=Courier New]bin/x64/plugins/cyber_engine_tweaks/gamelog.log[/font] (Cyber Engine Tweaks). If the ▦ button doesn't appear, check that line and [font=Courier New]r6/logs/redscript_rCURRENT.log[/font] for errors, and include both in your bug report.

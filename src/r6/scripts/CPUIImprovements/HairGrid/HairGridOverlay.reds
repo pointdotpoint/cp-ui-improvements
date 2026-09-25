@@ -3,10 +3,6 @@
 module CPUIImprovements.HairGrid
 import Codeware.UI.*
 
-public func HG_Log(msg: String) {
-    ModLog(n"HairGrid", msg);
-}
-
 public class HairGridOverlay extends inkCustomController {
     private let m_menu: wref<characterCreationBodyMorphMenu>;
     private let m_option: wref<CharacterCustomizationOption>;
@@ -68,9 +64,9 @@ public class HairGridOverlay extends inkCustomController {
         let panel = new inkCanvas();
         panel.SetName(n"panel");
         panel.SetAnchor(inkEAnchor.TopRight);
-        panel.SetAnchorPoint(new Vector2(1.0, 0.0));
-        panel.SetMargin(new inkMargin(0.0, 250.0, 110.0, 0.0));
-        panel.SetSize(new Vector2(panelW, panelH));
+        panel.SetAnchorPoint(Vector2(1.0, 0.0));
+        panel.SetMargin(inkMargin(0.0, 250.0, 110.0, 0.0));
+        panel.SetSize(Vector2(panelW, panelH));
         panel.SetInteractive(true);
         panel.Reparent(root);
 
@@ -84,18 +80,18 @@ public class HairGridOverlay extends inkCustomController {
 
         let accent = new inkRectangle();
         accent.SetAnchor(inkEAnchor.TopFillHorizontaly);
-        accent.SetSize(new Vector2(100.0, 5.0));
+        accent.SetSize(Vector2(100.0, 5.0));
         accent.SetTintColor(HG_Red());
         accent.Reparent(panel);
 
         let content = new inkVerticalPanel();
         content.SetAnchor(inkEAnchor.Fill);
-        content.SetMargin(new inkMargin(40.0, 36.0, 40.0, 36.0));
+        content.SetMargin(inkMargin(40.0, 36.0, 40.0, 36.0));
         content.Reparent(panel);
 
         // Header: title + page info
         let header = new inkHorizontalPanel();
-        header.SetMargin(new inkMargin(0.0, 0.0, 0.0, 24.0));
+        header.SetMargin(inkMargin(0.0, 0.0, 0.0, 24.0));
         header.Reparent(content);
 
         let title = HG_MakeText("HAIRSTYLES", 56, n"Semi-Bold", HG_Red());
@@ -103,28 +99,28 @@ public class HairGridOverlay extends inkCustomController {
         title.Reparent(header);
 
         let info = HG_MakeText("", 32, n"Medium", HG_MildRed());
-        info.SetMargin(new inkMargin(36.0, 16.0, 0.0, 0.0));
+        info.SetMargin(inkMargin(36.0, 16.0, 0.0, 0.0));
         info.Reparent(header);
 
         let grid = new inkVerticalPanel();
         grid.SetName(n"grid");
-        grid.SetSize(new Vector2(contentW, gridH));
+        grid.SetSize(Vector2(contentW, gridH));
         grid.Reparent(content);
 
         // Toast line: favorite added/removed, fades out on its own.
         let toast = new inkHorizontalPanel();
         toast.SetName(n"toast");
-        toast.SetSize(new Vector2(contentW, 48.0));
-        toast.SetMargin(new inkMargin(0.0, 6.0, 0.0, 6.0));
+        toast.SetSize(Vector2(contentW, 48.0));
+        toast.SetMargin(inkMargin(0.0, 6.0, 0.0, 6.0));
         toast.SetOpacity(0.0);
         toast.Reparent(content);
 
         let toastIcon = new inkImage();
         toastIcon.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
         toastIcon.SetTexturePart(n"icon_star");
-        toastIcon.SetSize(new Vector2(36.0, 36.0));
+        toastIcon.SetSize(Vector2(36.0, 36.0));
         toastIcon.SetVAlign(inkEVerticalAlign.Center);
-        toastIcon.SetMargin(new inkMargin(0.0, 0.0, 14.0, 0.0));
+        toastIcon.SetMargin(inkMargin(0.0, 0.0, 14.0, 0.0));
         toastIcon.Reparent(toast);
 
         let toastText = HG_MakeText("", 32, n"Medium", HG_Gold());
@@ -133,7 +129,7 @@ public class HairGridOverlay extends inkCustomController {
 
         // Footer: paging + close
         let footer = new inkHorizontalPanel();
-        footer.SetMargin(new inkMargin(0.0, 16.0, 0.0, 0.0));
+        footer.SetMargin(inkMargin(0.0, 16.0, 0.0, 0.0));
         footer.Reparent(content);
 
         this.MakeButton("< PREV", n"OnPrevRelease").Reparent(footer);
@@ -258,7 +254,7 @@ public class HairGridOverlay extends inkCustomController {
         while i < last {
             if (i - first) % this.m_cols == 0 {
                 row = new inkHorizontalPanel();
-                row.SetMargin(new inkMargin(0.0, 0.0, 0.0, this.m_gap));
+                row.SetMargin(inkMargin(0.0, 0.0, 0.0, this.m_gap));
                 row.Reparent(this.m_grid);
             }
             let index = this.m_order[i];
@@ -278,8 +274,8 @@ public class HairGridOverlay extends inkCustomController {
 
         let tile = new inkCanvas();
         tile.SetName(StringToName(s"hair_tile_\(index)"));
-        tile.SetSize(new Vector2(this.m_tileW, this.m_tileH));
-        tile.SetMargin(new inkMargin(0.0, 0.0, this.m_gap, 0.0));
+        tile.SetSize(Vector2(this.m_tileW, this.m_tileH));
+        tile.SetMargin(inkMargin(0.0, 0.0, this.m_gap, 0.0));
         tile.SetInteractive(true);
 
         let bg = new inkRectangle();
@@ -293,16 +289,16 @@ public class HairGridOverlay extends inkCustomController {
         let bar = new inkRectangle();
         bar.SetName(n"bar");
         bar.SetAnchor(inkEAnchor.LeftFillVerticaly);
-        bar.SetSize(new Vector2(6.0, 100.0));
+        bar.SetSize(Vector2(6.0, 100.0));
         bar.Reparent(tile);
 
         // Up to two lines, clipped with an ellipsis on the second.
         let label = HG_MakeText(HG_Ellipsize(this.GetLabel(entry), 46), 30, n"Semi-Bold", HG_Red());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.TopLeft);
-        label.SetMargin(new inkMargin(20.0, 10.0, 0.0, 0.0));
+        label.SetMargin(inkMargin(20.0, 10.0, 0.0, 0.0));
         label.SetFitToContent(false);
-        label.SetSize(new Vector2(labelW, 72.0));
+        label.SetSize(Vector2(labelW, 72.0));
         label.SetWrapping(true, labelW);
         label.SetOverflowPolicy(textOverflowPolicy.DotsEndLastLine);
         label.Reparent(tile);
@@ -312,10 +308,10 @@ public class HairGridOverlay extends inkCustomController {
         let sub = HG_MakeText(HG_Ellipsize(s"#\(index)  \(internal)", 36), 22, n"Regular", HG_MildRed());
         sub.SetName(n"sub");
         sub.SetAnchor(inkEAnchor.BottomLeft);
-        sub.SetAnchorPoint(new Vector2(0.0, 1.0));
-        sub.SetMargin(new inkMargin(20.0, 0.0, 0.0, 8.0));
+        sub.SetAnchorPoint(Vector2(0.0, 1.0));
+        sub.SetMargin(inkMargin(20.0, 0.0, 0.0, 8.0));
         sub.SetFitToContent(false);
-        sub.SetSize(new Vector2(textW, 28.0));
+        sub.SetSize(Vector2(textW, 28.0));
         sub.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
         sub.Reparent(tile);
 
@@ -325,9 +321,9 @@ public class HairGridOverlay extends inkCustomController {
         star.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\atlas_nameplate.inkatlas");
         star.SetTexturePart(n"icon_star");
         star.SetAnchor(inkEAnchor.TopRight);
-        star.SetAnchorPoint(new Vector2(1.0, 0.0));
-        star.SetMargin(new inkMargin(0.0, 10.0, 10.0, 0.0));
-        star.SetSize(new Vector2(38.0, 38.0));
+        star.SetAnchorPoint(Vector2(1.0, 0.0));
+        star.SetMargin(inkMargin(0.0, 10.0, 10.0, 0.0));
+        star.SetSize(Vector2(38.0, 38.0));
         star.SetInteractive(true);
         star.RegisterToCallback(n"OnRelease", this, n"OnStarRelease");
         star.RegisterToCallback(n"OnHoverOver", this, n"OnStarHoverOver");
@@ -433,8 +429,8 @@ public class HairGridOverlay extends inkCustomController {
 
     private func MakeButton(text: String, callback: CName) -> ref<inkCanvas> {
         let btn = new inkCanvas();
-        btn.SetSize(new Vector2(260.0, 80.0));
-        btn.SetMargin(new inkMargin(0.0, 0.0, 24.0, 0.0));
+        btn.SetSize(Vector2(260.0, 80.0));
+        btn.SetMargin(inkMargin(0.0, 0.0, 24.0, 0.0));
         btn.SetInteractive(true);
 
         let bg = new inkRectangle();
@@ -450,7 +446,7 @@ public class HairGridOverlay extends inkCustomController {
         let label = HG_MakeText(text, 34, n"Semi-Bold", HG_Red());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.Centered);
-        label.SetAnchorPoint(new Vector2(0.5, 0.5));
+        label.SetAnchorPoint(Vector2(0.5, 0.5));
         label.Reparent(btn);
 
         btn.RegisterToCallback(n"OnRelease", this, callback);
@@ -608,22 +604,22 @@ public func HG_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickne
 
     let top = new inkRectangle();
     top.SetAnchor(inkEAnchor.TopFillHorizontaly);
-    top.SetSize(new Vector2(100.0, thickness));
+    top.SetSize(Vector2(100.0, thickness));
     top.Reparent(frame);
 
     let bottom = new inkRectangle();
     bottom.SetAnchor(inkEAnchor.BottomFillHorizontaly);
-    bottom.SetSize(new Vector2(100.0, thickness));
+    bottom.SetSize(Vector2(100.0, thickness));
     bottom.Reparent(frame);
 
     let left = new inkRectangle();
     left.SetAnchor(inkEAnchor.LeftFillVerticaly);
-    left.SetSize(new Vector2(thickness, 100.0));
+    left.SetSize(Vector2(thickness, 100.0));
     left.Reparent(frame);
 
     let right = new inkRectangle();
     right.SetAnchor(inkEAnchor.RightFillVerticaly);
-    right.SetSize(new Vector2(thickness, 100.0));
+    right.SetSize(Vector2(thickness, 100.0));
     right.Reparent(frame);
 
     frame.Reparent(parent);
@@ -631,20 +627,20 @@ public func HG_AddFrame(parent: ref<inkCompoundWidget>, color: HDRColor, thickne
 }
 
 // Palette from base\gameplay\gui\common\main_colors.inkstyle (MainColors.*).
-public func HG_Red() -> HDRColor = new HDRColor(1.176, 0.381, 0.348, 1.0)
-public func HG_ActiveRed() -> HDRColor = new HDRColor(1.370, 0.444, 0.405, 1.0)
-public func HG_MildRed() -> HDRColor = new HDRColor(0.682, 0.231, 0.212, 1.0)
-public func HG_DarkRed() -> HDRColor = new HDRColor(0.263, 0.086, 0.094, 1.0)
-public func HG_HoverRed() -> HDRColor = new HDRColor(0.412, 0.086, 0.090, 1.0)  // Fullscreen_SecondaryBackground4
-public func HG_PanelBg() -> HDRColor = new HDRColor(0.055, 0.035, 0.050, 1.0)   // near Fullscreen_PrimaryBackgroundDarkest, red-shifted
-public func HG_Blue() -> HDRColor = new HDRColor(0.369, 0.965, 1.0, 1.0)
-public func HG_MildBlue() -> HDRColor = new HDRColor(0.204, 0.569, 0.592, 1.0)
-public func HG_FaintBlue() -> HDRColor = new HDRColor(0.090, 0.173, 0.180, 1.0)
-public func HG_Gold() -> HDRColor = new HDRColor(1.119, 0.844, 0.257, 1.0)
-public func HG_Black() -> HDRColor = new HDRColor(0.0, 0.0, 0.0, 1.0)
+public func HG_Red() -> HDRColor = HDRColor(1.176, 0.381, 0.348, 1.0)
+public func HG_ActiveRed() -> HDRColor = HDRColor(1.370, 0.444, 0.405, 1.0)
+public func HG_MildRed() -> HDRColor = HDRColor(0.682, 0.231, 0.212, 1.0)
+public func HG_DarkRed() -> HDRColor = HDRColor(0.263, 0.086, 0.094, 1.0)
+public func HG_HoverRed() -> HDRColor = HDRColor(0.412, 0.086, 0.090, 1.0)  // Fullscreen_SecondaryBackground4
+public func HG_PanelBg() -> HDRColor = HDRColor(0.055, 0.035, 0.050, 1.0)   // near Fullscreen_PrimaryBackgroundDarkest, red-shifted
+public func HG_Blue() -> HDRColor = HDRColor(0.369, 0.965, 1.0, 1.0)
+public func HG_MildBlue() -> HDRColor = HDRColor(0.204, 0.569, 0.592, 1.0)
+public func HG_FaintBlue() -> HDRColor = HDRColor(0.090, 0.173, 0.180, 1.0)
+public func HG_Gold() -> HDRColor = HDRColor(1.119, 0.844, 0.257, 1.0)
+public func HG_Black() -> HDRColor = HDRColor(0.0, 0.0, 0.0, 1.0)
 
 public func HG_Color(r: Float, g: Float, b: Float) -> HDRColor {
-    return new HDRColor(r, g, b, 1.0);
+    return HDRColor(r, g, b, 1.0);
 }
 
 public func HG_MakeText(text: String, size: Int32, style: CName, color: HDRColor) -> ref<inkText> {
