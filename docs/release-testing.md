@@ -10,17 +10,17 @@ Status key: **done** = observed working in the logs or reported during developme
 |---|---|---|---|
 | 1 | Startup: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready` in `gamelog.log`, no redscript error popup | done | 2026-09-25 13:53:19: `[CCUIImprovements] Character Creator UI Improvements 1.0.0 ready`, no error popup. |
 | 2 | Pick an entry from a grid, then CONFIRM: finalizes normally | done | Hair: 13:01 apply then "refinalize complete". Other rows reported working by the user ("it all works well"). |
-| 3 | Favorites: star toggles, favorites sort first, notice fades, header count is per category | re-check | Worked with a star on every tile. Now only favorites show a (gold) star, and clicking it unfavorites. Check that non-favorite tiles have no star and use the full width for the name. |
+| 3 | Favorites: star toggles, favorites sort first, notice fades, header count is per category | done | Confirmed in game by the user (2026-09-25, final build). |
 | 4 | Favorites persist after a full quit and relaunch | done | Keys present in Codeware's `ScriptableServiceContainer.dat` after a clean exit (14:00:10) and reported working after relaunch. Old Hair Grid favorites were lost to the pre-release rename (not a user-facing issue). |
 | 5 | New Game creator, real apartment mirror, ripperdoc, Character Customization Anywhere | done | Reported working by the user ("it all works"). |
 | 6 | Male V | done | Reported working by the user ("it all works"). |
 | 7 | Esc closes the grid; Enter/F don't confirm while it's open | done | Reported working by the user ("it all works"). |
 | 8 | Gamepad: nothing breaks, arrows still work | done | Reported working by the user ("it all works"). |
 | 9 | Tile text: long names end with "…" inside the tile, no overlap | done | Reported working by the user ("it all works"). |
-| 9b | Paging: one or two pages shows `< PREV` / `NEXT >` only; more than two shows `FIRST` `‹` `›` `LAST`, and FIRST/LAST jump to the ends | re-check | Paging worked with `<<` `>>` text; now drawn ‹ › chevrons. Check they point the right way (‹ = previous) and highlight on hover. |
+| 9b | Paging: one or two pages shows `< PREV` / `NEXT >` only; more than two shows `FIRST` `‹` `›` `LAST`, and FIRST/LAST jump to the ends | done | Confirmed in game by the user (2026-09-25, final build). |
 | 9c | Minimize: `[–]` on voice tone and on a normal row collapses it to a bare line (no frame) with name and value; `[+]` restores it. The collapsed row's arrows don't respond. The state survives reopening the menu and a restart. The list scrolls correctly with rows collapsed. Mirrors with Appearance Change Unlocker, which removes the voice row, still work | done | Reported working by the user ("it all works"). |
-| 9e | Footer star (before CLOSE): toggles the current entry's favorite, shows gold/dim to match, the notice appears, and it follows the current entry after clicking a tile | todo | |
-| 9d | Colors: the `[+]`/`[–]` toggle, tile/button/panel outlines and ‹ › chevrons are MainColors red (cyan outline on the current tile), not white | re-check | Fixed 2026-09-25: ink tint doesn't inherit to children, so drawn shapes rendered white. They're now tinted per widget (`CCUI_SetTint`). |
+| 9e | Footer star (before CLOSE): toggles the current entry's favorite, shows gold/dim to match, the notice appears, and it follows the current entry after clicking a tile | done | Confirmed in game by the user (2026-09-25, final build). |
+| 9d | Colors: the `[+]`/`[–]` toggle, tile/button/panel outlines and ‹ › chevrons are MainColors red (cyan outline on the current tile), not white | done | Confirmed in game by the user (2026-09-25, final build). |
 | 10 | Rows *without* a grid (skin tone, hair color, eyes, eyebrows, …) look and behave vanilla | done | Reported working by the user ("it all works"). |
 | 11 | Uninstall: delete the folder; the game starts and the creator is vanilla | done | Removed with `scripts/deploy.sh --uninstall`; the game started and the creator was vanilla (user, 2026-09-25). Reinstalled afterwards. |
 
