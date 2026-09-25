@@ -28,10 +28,10 @@ public class HairGridOverlay extends inkCustomController {
         self.m_menu = menu;
         self.m_hovered = -1;
         // Layout in the 3840x2160 authoring space the creator uses.
-        self.m_cols = 4;
-        self.m_rows = 8;
+        self.m_cols = 3;
+        self.m_rows = 10;
         self.m_tileW = 400.0;
-        self.m_tileH = 140.0;
+        self.m_tileH = 110.0;
         self.m_gap = 16.0;
         self.CreateInstance();
         return self;
@@ -57,9 +57,10 @@ public class HairGridOverlay extends inkCustomController {
 
         let panel = new inkCanvas();
         panel.SetName(n"panel");
-        panel.SetAnchor(inkEAnchor.CenterLeft);
-        panel.SetAnchorPoint(new Vector2(0.0, 0.5));
-        panel.SetMargin(new inkMargin(140.0, 0.0, 0.0, 0.0));
+        // Right side, over the option list, so the model stays visible.
+        panel.SetAnchor(inkEAnchor.CenterRight);
+        panel.SetAnchorPoint(new Vector2(1.0, 0.5));
+        panel.SetMargin(new inkMargin(0.0, 0.0, 110.0, 0.0));
         panel.SetSize(new Vector2(contentW + 80.0, 1640.0));
         panel.SetInteractive(true);
         panel.Reparent(root);
@@ -220,23 +221,18 @@ public class HairGridOverlay extends inkCustomController {
         bar.SetSize(new Vector2(6.0, 100.0));
         bar.Reparent(tile);
 
-        let num = HG_MakeText(s"#\(index)", 26, n"Medium", HG_Grey());
-        num.SetName(n"num");
-        num.SetAnchor(inkEAnchor.TopLeft);
-        num.SetMargin(new inkMargin(20.0, 10.0, 0.0, 0.0));
-        num.Reparent(tile);
-
         let label = HG_MakeText(this.GetLabel(entry), 32, n"Semi-Bold", HG_White());
         label.SetName(n"label");
         label.SetAnchor(inkEAnchor.TopLeft);
-        label.SetMargin(new inkMargin(20.0, 42.0, 12.0, 0.0));
+        label.SetMargin(new inkMargin(20.0, 12.0, 12.0, 0.0));
         label.SetWrapping(true, this.m_tileW - 36.0);
         label.SetOverflowPolicy(textOverflowPolicy.DotsEnd);
         label.SetSize(new Vector2(this.m_tileW - 36.0, 44.0));
         label.Reparent(tile);
 
-        // Internal name helps tell apart CCXL hairs that share a display name.
-        let sub = HG_MakeText(ArraySize(entry.names) > 0 ? NameToString(entry.names[0]) : "", 22, n"Regular", HG_Grey());
+        // Index + internal name help tell apart CCXL hairs that share a display name.
+        let internal = ArraySize(entry.names) > 0 ? NameToString(entry.names[0]) : "";
+        let sub = HG_MakeText(s"#\(index)  \(internal)", 22, n"Regular", HG_Grey());
         sub.SetName(n"sub");
         sub.SetAnchor(inkEAnchor.BottomLeft);
         sub.SetAnchorPoint(new Vector2(0.0, 1.0));
